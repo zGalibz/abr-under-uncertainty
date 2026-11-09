@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "gradual-v1",
+  "description": "Draft stepped congestion trace. Final rates and reaction anchors must be compiled from the measured HLS ladder.",
+  "status": "draft",
+  "clock": "server-monotonic-since-run-start",
+  "rateUnit": "decimal-kbit-per-second",
+  "responseStartDelayMs": 20,
+  "scheduler": {
+    "scope": "per-run-aggregate-media-body",
+    "discipline": "work-conserving-fifo",
+    "initialTokensBytes": 0,
+    "maxBurstBytes": 16384,
+    "maxChunkBytes": 4096
+  },
+  "phases": [
+    {"id": "high", "startMs": 0, "endMs": 20000, "downlinkKbps": 6000},
+    {"id": "upper-mid", "startMs": 20000, "endMs": 40000, "downlinkKbps": 3600},
+    {"id": "mid", "startMs": 40000, "endMs": 60000, "downlinkKbps": 2200},
+    {"id": "lower-mid", "startMs": 60000, "endMs": 80000, "downlinkKbps": 1200},
+    {"id": "low", "startMs": 80000, "endMs": 100000, "downlinkKbps": 700},
+    {"id": "recovery", "startMs": 100000, "downlinkKbps": 6000}
+  ]
+}

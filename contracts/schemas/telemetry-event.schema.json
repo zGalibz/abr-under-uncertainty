@@ -1,0 +1,1020 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://adaptive-hls.local/schemas/telemetry-event.schema.json",
+  "title": "Adaptive HLS normalized telemetry event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "runId",
+    "source",
+    "seq",
+    "type",
+    "clientMonoMs",
+    "clientEpochMs",
+    "data"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "runId": {
+      "$ref": "#/$defs/runId"
+    },
+    "source": {
+      "const": "player"
+    },
+    "seq": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "type": {
+      "enum": [
+        "client.ready",
+        "media.play_requested",
+        "media.playing",
+        "media.waiting",
+        "media.stalled",
+        "media.pause",
+        "media.seeking",
+        "media.seeked",
+        "media.rate_changed",
+        "media.ended",
+        "media.error",
+        "media.sample",
+        "client.visibility_changed",
+        "hls.manifest_parsed",
+        "hls.levels_updated",
+        "hls.level_switching",
+        "hls.level_switched",
+        "hls.frag_loading",
+        "hls.frag_loaded",
+        "hls.frag_buffered",
+        "hls.frag_changed",
+        "hls.error",
+        "abr.decision",
+        "client.finished"
+      ]
+    },
+    "clientMonoMs": {
+      "type": "number",
+      "minimum": 0
+    },
+    "clientEpochMs": {
+      "type": "number",
+      "minimum": 0
+    },
+    "mediaTimeSec": {
+      "type": "number",
+      "minimum": 0
+    },
+    "data": {
+      "type": "object"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "client.ready"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "$ref": "#/$defs/clientReady"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "media.play_requested"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "$ref": "#/$defs/playRequested"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "enum": [
+              "media.playing",
+              "media.waiting",
+              "media.stalled"
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "mediaTimeSec"
+        ],
+        "properties": {
+          "mediaTimeSec": {},
+          "data": {
+            "$ref": "#/$defs/mediaState"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "media.pause"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "mediaTimeSec"
+        ],
+        "properties": {
+          "mediaTimeSec": {},
+          "data": {
+            "$ref": "#/$defs/mediaPause"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "enum": [
+              "media.seeking",
+              "media.seeked"
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "mediaTimeSec"
+        ],
+        "properties": {
+          "mediaTimeSec": {},
+          "data": {
+            "$ref": "#/$defs/mediaSeek"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "media.ended"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "mediaTimeSec"
+        ],
+        "properties": {
+          "mediaTimeSec": {},
+          "data": {
+            "$ref": "#/$defs/mediaEnded"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "media.error"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "$ref": "#/$defs/mediaError"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "media.sample"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "mediaTimeSec"
+        ],
+        "properties": {
+          "mediaTimeSec": {},
+          "data": {
+            "$ref": "#/$defs/mediaSample"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "hls.manifest_parsed"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "$ref": "#/$defs/manifestParsed"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "enum": [
+              "hls.level_switching",
+              "hls.level_switched"
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "mediaTimeSec"
+        ],
+        "properties": {
+          "mediaTimeSec": {},
+          "data": {
+            "$ref": "#/$defs/levelEvent"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "hls.frag_loading"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "$ref": "#/$defs/fragLoading"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "hls.frag_loaded"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "$ref": "#/$defs/fragLoaded"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "hls.frag_buffered"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "$ref": "#/$defs/fragBuffered"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "hls.error"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "$ref": "#/$defs/hlsError"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "client.finished"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "$ref": "#/$defs/clientFinished"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "media.rate_changed"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "$ref": "#/$defs/rateChanged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "client.visibility_changed"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "$ref": "#/$defs/visibilityChanged"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "hls.levels_updated"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "$ref": "#/$defs/levelsUpdated"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "hls.frag_changed"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "$ref": "#/$defs/fragChanged"
+          },
+          "mediaTimeSec": {}
+        },
+        "required": [
+          "mediaTimeSec"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "abr.decision"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "data": {
+            "$ref": "#/$defs/abrDecision"
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "runId": {
+      "type": "string",
+      "pattern": "^r_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "level": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "level",
+        "width",
+        "height",
+        "bitrateBps",
+        "averageBitrateBps",
+        "codecs"
+      ],
+      "properties": {
+        "level": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "bitrateBps": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "averageBitrateBps": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "codecs": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "clientReady": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "userAgent",
+        "viewport",
+        "hlsJsVersion"
+      ],
+      "properties": {
+        "userAgent": {
+          "type": "string",
+          "minLength": 1
+        },
+        "hlsJsVersion": {
+          "const": "1.7.4"
+        },
+        "viewport": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "width",
+            "height",
+            "deviceScaleFactor"
+          ],
+          "properties": {
+            "width": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "height": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "deviceScaleFactor": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          }
+        }
+      }
+    },
+    "playRequested": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "muted",
+        "autoplay"
+      ],
+      "properties": {
+        "muted": {
+          "type": "boolean"
+        },
+        "autoplay": {
+          "type": "boolean"
+        }
+      }
+    },
+    "mediaState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "readyState",
+        "forwardBufferSec"
+      ],
+      "properties": {
+        "readyState": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4
+        },
+        "forwardBufferSec": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "mediaPause": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reason"
+      ],
+      "properties": {
+        "reason": {
+          "enum": [
+            "user",
+            "ended",
+            "unknown"
+          ]
+        }
+      }
+    },
+    "mediaSeek": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "targetTimeSec"
+      ],
+      "properties": {
+        "targetTimeSec": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "mediaEnded": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "durationSec"
+      ],
+      "properties": {
+        "durationSec": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "mediaError": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 4
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "mediaSample": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "currentTimeSec",
+        "readyState",
+        "forwardBufferSec",
+        "paused",
+        "seeking",
+        "playbackRate"
+      ],
+      "properties": {
+        "currentTimeSec": {
+          "type": "number",
+          "minimum": 0
+        },
+        "readyState": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4
+        },
+        "forwardBufferSec": {
+          "type": "number",
+          "minimum": 0
+        },
+        "paused": {
+          "type": "boolean"
+        },
+        "seeking": {
+          "type": "boolean"
+        },
+        "playbackRate": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "manifestParsed": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "levels",
+        "firstLevel"
+      ],
+      "properties": {
+        "levels": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/level"
+          }
+        },
+        "firstLevel": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "levelEvent": {
+      "$ref": "#/$defs/level"
+    },
+    "fragBase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "level",
+        "sn",
+        "startSec",
+        "durationSec",
+        "urlPath"
+      ],
+      "properties": {
+        "level": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sn": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "startSec": {
+          "type": "number",
+          "minimum": 0
+        },
+        "durationSec": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "urlPath": {
+          "type": "string",
+          "pattern": "^/stream/v1/r_[^/]+/v[0-9]+/seg_[0-9]+\\.ts$"
+        }
+      }
+    },
+    "fragLoading": {
+      "$ref": "#/$defs/fragBase"
+    },
+    "fragLoaded": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "level",
+        "sn",
+        "bytes",
+        "loadStartMs",
+        "firstByteMs",
+        "loadEndMs"
+      ],
+      "properties": {
+        "level": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sn": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "loadStartMs": {
+          "type": "number",
+          "minimum": 0
+        },
+        "firstByteMs": {
+          "type": "number",
+          "minimum": 0
+        },
+        "loadEndMs": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "fragBuffered": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "level",
+        "sn",
+        "bytes",
+        "bandwidthEstimateBps"
+      ],
+      "properties": {
+        "level": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sn": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "bandwidthEstimateBps": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        }
+      }
+    },
+    "hlsError": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fatal",
+        "errorType",
+        "details",
+        "httpStatus"
+      ],
+      "properties": {
+        "fatal": {
+          "type": "boolean"
+        },
+        "errorType": {
+          "type": "string",
+          "minLength": 1
+        },
+        "details": {
+          "type": "string",
+          "minLength": 1
+        },
+        "httpStatus": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 100,
+          "maximum": 599
+        }
+      }
+    },
+    "clientFinished": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reason",
+        "droppedVideoFrames",
+        "totalVideoFrames"
+      ],
+      "properties": {
+        "reason": {
+          "enum": [
+            "ended",
+            "fatal_error",
+            "timeout",
+            "aborted"
+          ]
+        },
+        "droppedVideoFrames": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "totalVideoFrames": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "rateChanged": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "playbackRate"
+      ],
+      "properties": {
+        "playbackRate": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "visibilityChanged": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state"
+      ],
+      "properties": {
+        "state": {
+          "enum": [
+            "visible",
+            "hidden",
+            "prerender"
+          ]
+        }
+      }
+    },
+    "levelsUpdated": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "levels"
+      ],
+      "properties": {
+        "levels": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/level"
+          }
+        }
+      }
+    },
+    "fragChanged": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "level",
+        "sn",
+        "startSec",
+        "durationSec",
+        "bitrateBps",
+        "width",
+        "height"
+      ],
+      "properties": {
+        "level": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sn": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "startSec": {
+          "type": "number",
+          "minimum": 0
+        },
+        "durationSec": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "bitrateBps": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "abrDecision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policyId",
+        "fromLevel",
+        "toLevel",
+        "reason",
+        "validSamples",
+        "estimateBps",
+        "safetyFactor",
+        "safeBudgetBps",
+        "forwardBufferSec",
+        "upEvidence"
+      ],
+      "properties": {
+        "policyId": {
+          "enum": [
+            "default-hlsjs",
+            "conservative-throughput-v1"
+          ]
+        },
+        "fromLevel": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "toLevel": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "reason": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{2,63}$"
+        },
+        "validSamples": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "fastBps": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "slowBps": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "estimateBps": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "safetyFactor": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        },
+        "safeBudgetBps": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "forwardBufferSec": {
+          "type": "number",
+          "minimum": 0
+        },
+        "upEvidence": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

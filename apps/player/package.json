@@ -1,0 +1,9 @@
+{
+  "name": "@abr-lab/player",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "dependencies": {
+    "hls.js": "1.7.4"
+  }
+}

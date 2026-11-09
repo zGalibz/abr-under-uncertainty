@@ -1,0 +1,51 @@
+# Dependencies
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+# Build and coverage
+dist/
+build/
+coverage/
+.nyc_output/
+*.log
+
+# Editors and OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Browser/runner state
+.browser-profile/
+playwright-report/
+test-results/
+
+# Large/local media
+assets/source/*
+!assets/source/.gitkeep
+!assets/source/README.md
+media/*
+!media/.gitkeep
+!media/README.md
+
+# Generated experiment evidence (manifests/summaries may be force-added after review)
+results/raw/*
+!results/raw/.gitkeep
+results/dry-run/*
+!results/dry-run/.gitkeep
+results/figures/*
+!results/figures/.gitkeep
+
+# Temporary files
+.tmp/
+tmp/

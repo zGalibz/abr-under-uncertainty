@@ -1,0 +1,37 @@
+name: Contract change
+about: Propose an API, schema, event, metric, or shared-interface change
+labels: [contract]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Why the current contract is insufficient
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+    validations:
+      required: true
+  - type: dropdown
+    id: compatibility
+    attributes:
+      label: Compatibility
+      options:
+        - Backward-compatible
+        - Breaking
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Producers, consumers, fixtures, tests, and data affected
+    validations:
+      required: true
+  - type: textarea
+    id: migration
+    attributes:
+      label: Version and migration plan
+    validations:
+      required: true

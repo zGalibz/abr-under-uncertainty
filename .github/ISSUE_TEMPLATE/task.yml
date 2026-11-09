@@ -1,0 +1,35 @@
+name: Task
+about: A scoped project deliverable
+labels: []
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What concrete outcome is required?
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: List required contracts, artifacts, or issues.
+  - type: textarea
+    id: deliverables
+    attributes:
+      label: Deliverables
+      description: List exact files, endpoints, logs, tests, or documents.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance checklist
+      description: State the observable checks that prove completion.
+    validations:
+      required: true
+  - type: textarea
+    id: handoff
+    attributes:
+      label: Handoff
+      description: Who consumes this work and what interface/version do they receive?

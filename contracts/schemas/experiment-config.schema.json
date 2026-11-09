@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://adaptive-hls.local/schemas/experiment-config.schema.json",
+  "title": "Adaptive HLS experiment configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "packageManifest",
+    "packageManifestSha256",
+    "scenarioFiles",
+    "player",
+    "browser",
+    "execution",
+    "stopPolicy"
+  ],
+  "properties": {
+    "schemaVersion": {"const": "1.0.0"},
+    "id": {"type": "string", "pattern": "^[a-z][a-z0-9-]{2,63}$"},
+    "packageManifest": {"type": "string", "pattern": "^media/package\\.json$"},
+    "packageManifestSha256": {"$ref": "#/$defs/sha256"},
+    "scenarioFiles": {
+      "type": "array",
+      "minItems": 3,
+      "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^configs/scenarios/[a-z0-9.-]+\\.json$"}
+    },
+    "player": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["hlsJsVersion", "policies", "capLevelToPlayerSize", "sampleIntervalMs", "conservativePolicyVersion"],
+      "properties": {
+        "hlsJsVersion": {"const": "1.7.4"},
+        "policies": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": {"enum": ["default-hlsjs", "conservative-throughput-v1"]},
+          "allOf": [
+            {"contains": {"const": "default-hlsjs"}},
+            {"contains": {"const": "conservative-throughput-v1"}}
+          ]
+        },
+        "capLevelToPlayerSize": {"const": false},
+        "sampleIntervalMs": {"const": 250},
+        "conservativePolicyVersion": {"const": "1.0.0"}
+      }
+    },
+    "browser": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["product", "executablePath", "headless", "viewport", "deviceScaleFactor", "cacheEnabled", "serviceWorkersBypassed"],
+      "properties": {
+        "product": {"const": "chrome"},
+        "executablePath": {"type": "string", "minLength": 1},
+        "headless": {"type": "boolean"},
+        "viewport": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["width", "height"],
+          "properties": {
+            "width": {"const": 1280},
+            "height": {"const": 720}
+          }
+        },
+        "deviceScaleFactor": {"const": 1},
+        "cacheEnabled": {"const": false},
+        "serviceWorkersBypassed": {"const": true}
+      }
+    },
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repetitionsPerCell", "orderSeed", "freshBrowserContextPerRun", "maxConcurrentRuns"],
+      "properties": {
+        "repetitionsPerCell": {"const": 3},
+        "orderSeed": {"type": "integer", "minimum": 0, "maximum": 4294967295},
+        "freshBrowserContextPerRun": {"const": true},
+        "maxConcurrentRuns": {"const": 1}
+      }
+    },
+    "stopPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stopOnEnded", "stopOnFatalError", "maxWallDurationMs"],
+      "properties": {
+        "stopOnEnded": {"const": true},
+        "stopOnFatalError": {"const": true},
+        "maxWallDurationMs": {"type": "integer", "minimum": 1000, "maximum": 3600000}
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

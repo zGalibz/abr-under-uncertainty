@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "1.0.0",
+  "runId": "r_017f22e2-79b0-7cc3-98c4-dc0c0c07398f",
+  "source": "player",
+  "seq": 37,
+  "type": "hls.level_switched",
+  "clientMonoMs": 18344.57,
+  "clientEpochMs": 1794196818468.6,
+  "mediaTimeSec": 16.043,
+  "data": {
+    "level": 0,
+    "width": 640,
+    "height": 360,
+    "bitrateBps": 596000,
+    "averageBitrateBps": 580000,
+    "codecs": "avc1.64001e,mp4a.40.2"
+  }
+}

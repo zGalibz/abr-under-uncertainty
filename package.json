@@ -1,0 +1,21 @@
+{
+  "name": "abr-under-uncertainty",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Controlled HLS adaptive-bitrate experiment under deterministic bandwidth changes",
+  "license": "MIT",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "check:foundation": "node scripts/validate-foundation.mjs"
+  },
+  "devDependencies": {
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1"
+  }
+}
