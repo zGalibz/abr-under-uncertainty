@@ -1,0 +1,26 @@
+# Default owner and repository administrator
+* @zGalibz
+
+# Member 1 — Asadullah Galib: media + networking
+/assets/ @zGalibz
+/media/ @zGalibz
+/packages/media-cli/ @zGalibz
+/packages/shaper-server/ @zGalibz
+/configs/scenarios/ @zGalibz
+
+# Member 2 — Susmoy L: player + adaptation
+/apps/player/ @susssm
+
+# Member 3 — Miraj: evidence + analysis + presentation
+/packages/runner/ @ahsanullahmiraj
+/packages/analysis/ @ahsanullahmiraj
+/results/ @ahsanullahmiraj
+/slides/ @ahsanullahmiraj
+
+# Shared contracts and project governance
+/contracts/ @zGalibz @susssm @ahsanullahmiraj
+/packages/contracts/ @zGalibz @susssm @ahsanullahmiraj
+/docs/PROJECT_DESIGN.md @zGalibz @susssm @ahsanullahmiraj
+/docs/TEAM_ROLES.md @zGalibz @susssm @ahsanullahmiraj
+/docs/decisions/ @zGalibz @susssm @ahsanullahmiraj
+/.github/ @zGalibz @susssm @ahsanullahmiraj
