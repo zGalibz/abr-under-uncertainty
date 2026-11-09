@@ -61,6 +61,8 @@ Final acceptance always uses the actual integrated components, not only mocks.
 
 Primary responsibility: **Media + Networking**
 
+GitHub: `@zGalibz`
+
 Primary paths:
 
 ```text
@@ -340,6 +342,8 @@ Member 1 exit gate:
 
 Primary responsibility: **Player + Adaptation**
 
+GitHub: `@susssm`
+
 Primary paths:
 
 ```text
@@ -541,6 +545,8 @@ Member 2 exit gate:
 # 6. Member 3 — Miraj
 
 Primary responsibility: **Evidence + Analysis + Presentation**
+
+GitHub: `@ahsanullahmiraj`
 
 Primary paths:
 

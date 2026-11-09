@@ -20,9 +20,9 @@ Expected outcomes are hypotheses until the complete experiment matrix has been e
 
 | Member | Primary ownership |
 |---|---|
-| **Asadullah Galib** | Member 1 — media packaging, HLS validation, local HTTP server, deterministic bandwidth shaping |
-| **Susmoy L** | Member 2 — hls.js player, default/custom ABR, browser telemetry, live dashboard |
-| **Miraj** | Member 3 — experiment orchestration, validation, analysis, charts, presentation |
+| **Asadullah Galib** (`@zGalibz`) | Member 1 — media packaging, HLS validation, local HTTP server, deterministic bandwidth shaping |
+| **Susmoy L** (`@susssm`) | Member 2 — hls.js player, default/custom ABR, browser telemetry, live dashboard |
+| **Miraj** (`@ahsanullahmiraj`) | Member 3 — experiment orchestration, validation, analysis, charts, presentation |
 
 Ownership identifies the first reviewer and maintainer. It does not prevent another member from contributing through a pull request.
 

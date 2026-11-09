@@ -144,7 +144,7 @@ All three members approve milestone tags. `v0.5-data-freeze` is immutable; later
   - force pushes and deletion blocked;
   - required checks added when CI exists.
 
-Actual teammate GitHub handles must be confirmed before adding collaborators or activating `CODEOWNERS`; names alone are not valid GitHub identities.
+Confirmed GitHub mapping: Asadullah Galib = `@zGalibz`, Susmoy L = `@susssm`, and Miraj = `@ahsanullahmiraj`. Invitations were sent with write access on 2026-11-09; each teammate must accept before direct branch pushes and automatic CODEOWNERS review requests work fully.
 
 ## 10. Conflict prevention
 
