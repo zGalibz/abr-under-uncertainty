@@ -1,6 +1,15 @@
 {
   "name": "@abr-lab/media-cli",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
-  "license": "MIT"
+  "type": "module",
+  "license": "MIT",
+  "bin": {
+    "abr-media": "bin/media-cli.mjs"
+  },
+  "scripts": {
+    "test": "node --test test/**/*.test.mjs",
+    "package": "node bin/media-cli.mjs package",
+    "validate": "node bin/media-cli.mjs validate"
+  }
 }

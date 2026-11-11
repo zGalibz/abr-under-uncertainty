@@ -1,5 +1,6 @@
 # Dependencies
 node_modules/
+.hermes/
 .venv/
 venv/
 __pycache__/
@@ -37,6 +38,8 @@ assets/source/*
 media/*
 !media/.gitkeep
 !media/README.md
+!media/package.json
+!media/validation-report.json
 
 # Generated experiment evidence (manifests/summaries may be force-added after review)
 results/raw/*

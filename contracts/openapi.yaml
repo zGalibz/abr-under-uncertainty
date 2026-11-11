@@ -2,16 +2,43 @@ openapi: 3.1.0
 info:
   title: Adaptive HLS Experiment API
   version: 1.0.0
-  license:
-    name: MIT
-    identifier: MIT
-  description: >-
-    Normative lifecycle, telemetry, and run-scoped HLS interface. API and
-    playlist traffic is unshaped; successful media GET bodies are shaped.
-security: []
+  license: {name: MIT, identifier: MIT}
+  description: Lifecycle, telemetry, readiness, and run-scoped HLS interface.
 servers:
   - url: http://127.0.0.1:8080
+security: []
 paths:
+  /healthz:
+    get:
+      operationId: getHealth
+      summary: Process liveness probe
+      responses:
+        '200':
+          description: Process is alive
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [status]
+                properties: {status: {const: ok}}
+        '400': {$ref: '#/components/responses/BadRequest'}
+  /readyz:
+    get:
+      operationId: getReadiness
+      summary: Package, configuration, and persistence readiness probe
+      responses:
+        '200':
+          description: Server is ready
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [status]
+                properties: {status: {const: ready}}
+        '503': {$ref: '#/components/responses/ServiceUnavailable'}
+        '400': {$ref: '#/components/responses/BadRequest'}
   /api/v1/runs:
     post:
       operationId: createRun
@@ -20,51 +47,38 @@ paths:
         required: true
         content:
           application/json:
-            schema:
-              $ref: '#/components/schemas/CreateRunRequest'
+            schema: {$ref: '#/components/schemas/CreateRunRequest'}
       responses:
         '201':
           description: New run created
-          content:
-            application/json:
-              schema: {$ref: '#/components/schemas/Run'}
+          content: {application/json: {schema: {$ref: './schemas/run.schema.json'}}}
         '200':
-          description: Idempotent replay returned existing identical run
-          content:
-            application/json:
-              schema: {$ref: '#/components/schemas/Run'}
+          description: Identical idempotent replay
+          content: {application/json: {schema: {$ref: './schemas/run.schema.json'}}}
         '409': {$ref: '#/components/responses/Conflict'}
         '422': {$ref: '#/components/responses/ValidationError'}
   /api/v1/runs/{runId}:
     get:
       operationId: getRun
       summary: Read exact persisted run state
-      parameters:
-        - $ref: '#/components/parameters/RunId'
+      parameters: [{$ref: '#/components/parameters/RunId'}]
       responses:
         '200':
-          description: Run
-          content:
-            application/json:
-              schema: {$ref: '#/components/schemas/Run'}
+          description: Run state
+          content: {application/json: {schema: {$ref: './schemas/run.schema.json'}}}
         '404': {$ref: '#/components/responses/NotFound'}
   /api/v1/runs/{runId}/start:
     post:
       operationId: startRun
-      summary: Fix server monotonic t0 once and enable the run stream
-      parameters:
-        - $ref: '#/components/parameters/RunId'
+      summary: Fix server monotonic t0 once and enable streaming
+      parameters: [{$ref: '#/components/parameters/RunId'}]
       requestBody:
         required: true
-        content:
-          application/json:
-            schema: {$ref: '#/components/schemas/StartRunRequest'}
+        content: {application/json: {schema: {$ref: '#/components/schemas/StartRunRequest'}}}
       responses:
         '200':
-          description: Started or idempotently returned already-started run
-          content:
-            application/json:
-              schema: {$ref: '#/components/schemas/StartRunResponse'}
+          description: Started or identical replay
+          content: {application/json: {schema: {$ref: '#/components/schemas/StartRunResponse'}}}
         '404': {$ref: '#/components/responses/NotFound'}
         '409': {$ref: '#/components/responses/Conflict'}
         '422': {$ref: '#/components/responses/ValidationError'}
@@ -73,47 +87,32 @@ paths:
       operationId: appendEvents
       summary: Idempotently append normalized player telemetry
       description: >-
-        Body limit is 1 MiB. Identity is (runId, source, seq). Replayed events
-        are counted as duplicates and not stored twice. Sequence gaps are
-        accepted while RUNNING and reported at finalization.
-      parameters:
-        - $ref: '#/components/parameters/RunId'
+        Identity is (runId, source, seq). Identical replay is a duplicate. The
+        same identity with different content returns EVENT_IDENTITY_CONFLICT.
+      parameters: [{$ref: '#/components/parameters/RunId'}]
       requestBody:
         required: true
-        content:
-          application/json:
-            schema: {$ref: '#/components/schemas/EventBatch'}
+        content: {application/json: {schema: {$ref: '#/components/schemas/EventBatch'}}}
       responses:
         '202':
-          description: Batch accepted
-          content:
-            application/json:
-              schema: {$ref: '#/components/schemas/EventBatchResult'}
+          description: Batch durably accepted
+          content: {application/json: {schema: {$ref: '#/components/schemas/EventBatchResult'}}}
         '404': {$ref: '#/components/responses/NotFound'}
         '409': {$ref: '#/components/responses/Conflict'}
-        '413':
-          description: Body exceeds 1 MiB
-          content:
-            application/json:
-              schema: {$ref: '#/components/schemas/Error'}
+        '413': {$ref: '#/components/responses/PayloadTooLarge'}
         '422': {$ref: '#/components/responses/ValidationError'}
   /api/v1/runs/{runId}/finish:
     post:
       operationId: finishRun
-      summary: Stop stream acceptance and atomically finalize run artifacts
-      parameters:
-        - $ref: '#/components/parameters/RunId'
+      summary: Finalize evidence and publish a terminal state
+      parameters: [{$ref: '#/components/parameters/RunId'}]
       requestBody:
         required: true
-        content:
-          application/json:
-            schema: {$ref: '#/components/schemas/FinishRunRequest'}
+        content: {application/json: {schema: {$ref: '#/components/schemas/FinishRunRequest'}}}
       responses:
         '200':
-          description: Finalized or idempotently returned final state
-          content:
-            application/json:
-              schema: {$ref: '#/components/schemas/Run'}
+          description: Finalized or identical replay
+          content: {application/json: {schema: {$ref: './schemas/run.schema.json'}}}
         '404': {$ref: '#/components/responses/NotFound'}
         '409': {$ref: '#/components/responses/Conflict'}
         '422': {$ref: '#/components/responses/ValidationError'}
@@ -121,8 +120,7 @@ paths:
     post:
       operationId: abortRun
       summary: Abort a CREATED or RUNNING run
-      parameters:
-        - $ref: '#/components/parameters/RunId'
+      parameters: [{$ref: '#/components/parameters/RunId'}]
       requestBody:
         required: true
         content:
@@ -131,31 +129,27 @@ paths:
               type: object
               additionalProperties: false
               required: [reason]
-              properties:
-                reason: {type: string, minLength: 1, maxLength: 500}
+              properties: {reason: {type: string, minLength: 1, maxLength: 500}}
       responses:
         '200':
-          description: Aborted or idempotently returned ABORTED run
-          content:
-            application/json:
-              schema: {$ref: '#/components/schemas/Run'}
+          description: Aborted or identical replay
+          content: {application/json: {schema: {$ref: './schemas/run.schema.json'}}}
         '404': {$ref: '#/components/responses/NotFound'}
         '409': {$ref: '#/components/responses/Conflict'}
   /stream/v1/{runId}/master.m3u8:
+    parameters: [{$ref: '#/components/parameters/RunId'}]
     get:
       operationId: getMasterPlaylist
-      summary: Get run-namespaced HLS master playlist (unshaped)
-      parameters:
-        - $ref: '#/components/parameters/RunId'
+      summary: Get rewritten run-scoped master playlist
       responses:
-        '200':
-          description: HLS master playlist
-          headers:
-            Cache-Control: {$ref: '#/components/headers/CacheControl'}
-            X-Run-Id: {$ref: '#/components/headers/RunHeader'}
-          content:
-            application/vnd.apple.mpegurl:
-              schema: {type: string}
+        '200': {$ref: '#/components/responses/HlsFull'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+    head:
+      operationId: headMasterPlaylist
+      summary: Get master-playlist metadata with no body
+      responses:
+        '200': {$ref: '#/components/responses/HlsHead'}
         '404': {$ref: '#/components/responses/NotFound'}
         '409': {$ref: '#/components/responses/Conflict'}
   /stream/v1/{runId}/{assetPath}:
@@ -164,67 +158,30 @@ paths:
       - name: assetPath
         in: path
         required: true
-        description: >-
-          Normalized package-relative path. Implementations must route this as
-          a catch-all despite OpenAPI's single-segment path notation, and must
-          reject traversal/symlink escape.
+        description: Catch-all normalized package-relative path
         schema: {type: string, minLength: 1}
     get:
       operationId: getRunAsset
-      summary: Get a playlist (unshaped) or a shaped media representation/range
-      parameters:
-        - name: Range
-          in: header
-          required: false
-          description: Exactly one bytes range; multiple ranges are unsupported
-          schema: {type: string, pattern: '^bytes=(?:[0-9]+-[0-9]*|-[0-9]+)$'}
+      summary: Get a rewritten playlist or shaped media representation
+      parameters: [{$ref: '#/components/parameters/Range'}, {$ref: '#/components/parameters/IfRange'}]
       responses:
-        '200':
-          description: Full representation
-          headers:
-            Accept-Ranges: {$ref: '#/components/headers/AcceptRanges'}
-            Cache-Control: {$ref: '#/components/headers/CacheControl'}
-            X-Run-Id: {$ref: '#/components/headers/RunHeader'}
-            X-Scenario-Phase: {$ref: '#/components/headers/PhaseHeader'}
-          content:
-            application/vnd.apple.mpegurl: {schema: {type: string}}
-            video/mp2t: {schema: {type: string, format: binary}}
-        '206':
-          description: One satisfiable byte range; media body is shaped
-          headers:
-            Accept-Ranges: {$ref: '#/components/headers/AcceptRanges'}
-            Content-Range:
-              required: true
-              schema: {type: string, pattern: '^bytes [0-9]+-[0-9]+/[0-9]+$'}
-            Cache-Control: {$ref: '#/components/headers/CacheControl'}
-            X-Run-Id: {$ref: '#/components/headers/RunHeader'}
-            X-Scenario-Phase: {$ref: '#/components/headers/PhaseHeader'}
-          content:
-            video/mp2t: {schema: {type: string, format: binary}}
+        '200': {$ref: '#/components/responses/HlsFull'}
+        '206': {$ref: '#/components/responses/HlsPartial'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '404': {$ref: '#/components/responses/NotFound'}
         '409': {$ref: '#/components/responses/Conflict'}
-        '416':
-          description: Range not satisfiable
-          headers:
-            Content-Range:
-              required: true
-              schema: {type: string, pattern: '^bytes \\*/[0-9]+$'}
-          content:
-            application/json:
-              schema: {$ref: '#/components/schemas/Error'}
+        '416': {$ref: '#/components/responses/RangeNotSatisfiable'}
     head:
       operationId: headRunAsset
-      summary: Return selected-representation headers with no body and no shaping charge
+      summary: Return selected-representation headers with no body or shaping charge
+      parameters: [{$ref: '#/components/parameters/Range'}, {$ref: '#/components/parameters/IfRange'}]
       responses:
-        '200':
-          description: Representation metadata
-          headers:
-            Accept-Ranges: {$ref: '#/components/headers/AcceptRanges'}
-            Cache-Control: {$ref: '#/components/headers/CacheControl'}
-            X-Run-Id: {$ref: '#/components/headers/RunHeader'}
+        '200': {$ref: '#/components/responses/HlsHead'}
+        '206': {$ref: '#/components/responses/HlsPartialHead'}
+        '400': {$ref: '#/components/responses/BadRequest'}
         '404': {$ref: '#/components/responses/NotFound'}
         '409': {$ref: '#/components/responses/Conflict'}
+        '416': {$ref: '#/components/responses/RangeNotSatisfiable'}
 components:
   parameters:
     RunId:
@@ -232,61 +189,44 @@ components:
       in: path
       required: true
       schema: {$ref: '#/components/schemas/RunId'}
-  headers:
-    AcceptRanges:
-      required: true
-      schema: {type: string, const: bytes}
-    CacheControl:
-      required: true
-      schema: {type: string, const: no-store}
-    RunHeader:
-      required: true
-      schema: {$ref: '#/components/schemas/RunId'}
-    PhaseHeader:
+    Range:
+      name: Range
+      in: header
       required: false
-      schema: {type: string, pattern: '^[a-z][a-z0-9-]{0,31}$'}
+      schema: {type: string}
+    IfRange:
+      name: If-Range
+      in: header
+      required: false
+      description: Unsupported in v1
+      schema: {type: string}
+  headers:
+    AcceptRanges: {required: true, schema: {type: string, const: bytes}}
+    CacheControl: {required: true, schema: {type: string, const: no-store}}
+    ContentLength: {required: true, schema: {type: integer, minimum: 0}}
+    NoSniff: {required: true, schema: {type: string, const: nosniff}}
+    RunHeader: {required: true, schema: {$ref: '#/components/schemas/RunId'}}
+    PhaseHeader: {required: false, schema: {type: string}}
+    ContentRange: {required: true, schema: {type: string}}
   schemas:
     RunId:
       type: string
       pattern: '^r_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
-    Sha256:
-      type: string
-      pattern: '^[0-9a-f]{64}$'
-    RunStatus:
-      enum: [CREATED, RUNNING, FINALIZING, COMPLETED, FAILED, ABORTED]
+    Sha256: {type: string, pattern: '^[0-9a-f]{64}$'}
     CreateRunRequest:
       type: object
       additionalProperties: false
-      required: [requestId, experimentId, scenarioId, repetition, orderSeed, clientLabel]
+      required: [requestId, experimentId, scenarioId, policyId, repetition, orderSeed, clientLabel, gitCommit, gitDirty]
       properties:
         requestId: {type: string, format: uuid}
-        experimentId: {type: string, pattern: '^[a-z][a-z0-9-]{2,63}$'}
-        scenarioId: {type: string, pattern: '^[a-z][a-z0-9-]{2,63}$'}
+        experimentId: {type: string}
+        scenarioId: {type: string}
+        policyId: {enum: [default-hlsjs, conservative-throughput-v1]}
         repetition: {type: integer, minimum: 1}
         orderSeed: {type: integer, minimum: 0, maximum: 4294967295}
         clientLabel: {type: string, minLength: 1, maxLength: 100}
-    Run:
-      type: object
-      additionalProperties: false
-      required: [schemaVersion, runId, requestId, status, experimentId, experimentSha256, scenarioId, scenarioSha256, packageSha256, repetition, createdAt]
-      properties:
-        schemaVersion: {const: 1.0.0}
-        runId: {$ref: '#/components/schemas/RunId'}
-        requestId: {type: string, format: uuid}
-        status: {$ref: '#/components/schemas/RunStatus'}
-        experimentId: {type: string}
-        experimentSha256: {$ref: '#/components/schemas/Sha256'}
-        scenarioId: {type: string}
-        scenarioSha256: {$ref: '#/components/schemas/Sha256'}
-        packageSha256: {$ref: '#/components/schemas/Sha256'}
-        repetition: {type: integer, minimum: 1}
-        createdAt: {type: string, format: date-time}
-        startedAt: {type: [string, 'null'], format: date-time}
-        finishedAt: {type: [string, 'null'], format: date-time}
-        finishReason: {type: [string, 'null']}
-        warnings:
-          type: array
-          items: {type: string}
+        gitCommit: {type: string, pattern: '^[0-9a-f]{40}$'}
+        gitDirty: {type: boolean}
     StartRunRequest:
       type: object
       additionalProperties: false
@@ -301,10 +241,10 @@ components:
       properties:
         runId: {$ref: '#/components/schemas/RunId'}
         status: {const: RUNNING}
-        hlsUrl: {type: string, pattern: '^/stream/v1/r_.+/master\\.m3u8$'}
-        serverRunStartEpochMs: {type: number, minimum: 0}
-        serverReceiveEpochMs: {type: number, minimum: 0}
-        serverSendEpochMs: {type: number, minimum: 0}
+        hlsUrl: {type: string}
+        serverRunStartEpochMs: {type: number}
+        serverReceiveEpochMs: {type: number}
+        serverSendEpochMs: {type: number}
         scenarioId: {type: string}
         scenarioSha256: {$ref: '#/components/schemas/Sha256'}
     EventBatch:
@@ -316,8 +256,7 @@ components:
           type: array
           minItems: 1
           maxItems: 200
-          items:
-            $ref: './schemas/telemetry-event.schema.json'
+          items: {$ref: './schemas/telemetry-event.schema.json'}
     EventBatchResult:
       type: object
       additionalProperties: false
@@ -328,8 +267,7 @@ components:
         highestSeqBySource:
           type: object
           additionalProperties: false
-          properties:
-            player: {type: integer, minimum: 0}
+          properties: {player: {type: integer, minimum: 0}}
     FinishRunRequest:
       type: object
       additionalProperties: false
@@ -337,42 +275,65 @@ components:
       properties:
         reason: {enum: [ended, fatal_error, timeout, aborted]}
         lastSeq: {type: integer, minimum: 0}
-        clientSummary:
-          type: object
-          additionalProperties: false
-          required: [startupDelayMs, rebufferCount, rebufferDurationMs, droppedVideoFrames, totalVideoFrames]
-          properties:
-            startupDelayMs: {type: number, minimum: 0}
-            rebufferCount: {type: integer, minimum: 0}
-            rebufferDurationMs: {type: number, minimum: 0}
-            droppedVideoFrames: {type: integer, minimum: 0}
-            totalVideoFrames: {type: integer, minimum: 0}
+        clientSummary: {type: object, additionalProperties: true}
     Error:
       type: object
       additionalProperties: false
       required: [code, message]
       properties:
         code: {type: string, pattern: '^[A-Z][A-Z0-9_]+$'}
-        message: {type: string, minLength: 1}
+        message: {type: string}
         details: {type: object, additionalProperties: true}
   responses:
-    BadRequest:
-      description: Malformed or unsupported request
+    HlsFull:
+      description: Full HLS representation
+      headers:
+        Accept-Ranges: {$ref: '#/components/headers/AcceptRanges'}
+        Cache-Control: {$ref: '#/components/headers/CacheControl'}
+        Content-Length: {$ref: '#/components/headers/ContentLength'}
+        X-Content-Type-Options: {$ref: '#/components/headers/NoSniff'}
+        X-Run-Id: {$ref: '#/components/headers/RunHeader'}
+        X-Scenario-Phase: {$ref: '#/components/headers/PhaseHeader'}
       content:
-        application/json:
-          schema: {$ref: '#/components/schemas/Error'}
-    NotFound:
-      description: Run or asset not found
+        application/vnd.apple.mpegurl: {schema: {type: string}}
+        video/mp2t: {schema: {type: string, format: binary}}
+    HlsPartial:
+      description: Single selected byte range
+      headers:
+        Accept-Ranges: {$ref: '#/components/headers/AcceptRanges'}
+        Cache-Control: {$ref: '#/components/headers/CacheControl'}
+        Content-Length: {$ref: '#/components/headers/ContentLength'}
+        Content-Range: {$ref: '#/components/headers/ContentRange'}
+        X-Content-Type-Options: {$ref: '#/components/headers/NoSniff'}
+        X-Run-Id: {$ref: '#/components/headers/RunHeader'}
+        X-Scenario-Phase: {$ref: '#/components/headers/PhaseHeader'}
       content:
-        application/json:
-          schema: {$ref: '#/components/schemas/Error'}
-    Conflict:
-      description: State or idempotency conflict
-      content:
-        application/json:
-          schema: {$ref: '#/components/schemas/Error'}
-    ValidationError:
-      description: Body failed schema or semantic validation
-      content:
-        application/json:
-          schema: {$ref: '#/components/schemas/Error'}
+        application/vnd.apple.mpegurl: {schema: {type: string}}
+        video/mp2t: {schema: {type: string, format: binary}}
+    HlsHead:
+      description: Full representation metadata with no body
+      headers:
+        Accept-Ranges: {$ref: '#/components/headers/AcceptRanges'}
+        Cache-Control: {$ref: '#/components/headers/CacheControl'}
+        Content-Length: {$ref: '#/components/headers/ContentLength'}
+        X-Content-Type-Options: {$ref: '#/components/headers/NoSniff'}
+        X-Run-Id: {$ref: '#/components/headers/RunHeader'}
+    HlsPartialHead:
+      description: Byte-range metadata with no body
+      headers:
+        Accept-Ranges: {$ref: '#/components/headers/AcceptRanges'}
+        Cache-Control: {$ref: '#/components/headers/CacheControl'}
+        Content-Length: {$ref: '#/components/headers/ContentLength'}
+        Content-Range: {$ref: '#/components/headers/ContentRange'}
+        X-Content-Type-Options: {$ref: '#/components/headers/NoSniff'}
+        X-Run-Id: {$ref: '#/components/headers/RunHeader'}
+    BadRequest: {description: Malformed request, content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    NotFound: {description: Not found, content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    Conflict: {description: "Lifecycle, idempotency, or EVENT_IDENTITY_CONFLICT", content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    ValidationError: {description: Validation failed, content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    PayloadTooLarge: {description: Body exceeds 1 MiB, content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    ServiceUnavailable: {description: Not ready, content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}}
+    RangeNotSatisfiable:
+      description: Valid range is unsatisfiable
+      headers: {Content-Range: {$ref: '#/components/headers/ContentRange'}}
+      content: {application/json: {schema: {$ref: '#/components/schemas/Error'}}}

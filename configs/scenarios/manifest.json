@@ -1,0 +1,143 @@
+{
+  "schemaVersion": "1.0.0",
+  "packageManifestSha256": "a8c65b415d4729f84e1a17f6882623a47e2e3f1b0f24739c07224d7a96201158",
+  "scenarios": [
+    {
+      "id": "stable-v1",
+      "path": "configs/scenarios/stable.v1.json",
+      "sha256": "bcf57c79fc092bcd54830e28fb6f84dfa1b5b310403a5e07e78dfb3145359447",
+      "anchors": []
+    },
+    {
+      "id": "gradual-v1",
+      "path": "configs/scenarios/gradual.v1.json",
+      "sha256": "1a58551387803cc48b8c7d848d9735374d2c210dc64bc8895fb8de887284e41c",
+      "anchors": [
+        {
+          "id": "v2-safe-anchor",
+          "atMs": 20000,
+          "kind": "adverse",
+          "fromPhaseId": "high",
+          "toPhaseId": "v2-safe",
+          "fromKbps": 7045,
+          "toKbps": 4408
+        },
+        {
+          "id": "v1-safe-anchor",
+          "atMs": 40000,
+          "kind": "adverse",
+          "fromPhaseId": "v2-safe",
+          "toPhaseId": "v1-safe",
+          "fromKbps": 4408,
+          "toKbps": 2409
+        },
+        {
+          "id": "v0-safe-anchor",
+          "atMs": 60000,
+          "kind": "adverse",
+          "fromPhaseId": "v1-safe",
+          "toPhaseId": "v0-safe",
+          "fromKbps": 2409,
+          "toKbps": 1292
+        },
+        {
+          "id": "severe-anchor",
+          "atMs": 80000,
+          "kind": "adverse",
+          "fromPhaseId": "v0-safe",
+          "toPhaseId": "severe",
+          "fromKbps": 1292,
+          "toKbps": 711
+        },
+        {
+          "id": "recovery-anchor",
+          "atMs": 100000,
+          "kind": "recovery",
+          "fromPhaseId": "severe",
+          "toPhaseId": "recovery",
+          "fromKbps": 711,
+          "toKbps": 7045
+        }
+      ]
+    },
+    {
+      "id": "volatile-v1",
+      "path": "configs/scenarios/volatile.v1.json",
+      "sha256": "b0096b6f6825532106a946390c56b46388d3b270dceb99054d0e9a5eed430a50",
+      "anchors": [
+        {
+          "id": "v0-safe-1-anchor",
+          "atMs": 12000,
+          "kind": "adverse",
+          "fromPhaseId": "high-1",
+          "toPhaseId": "v0-safe-1",
+          "fromKbps": 7045,
+          "toKbps": 1292
+        },
+        {
+          "id": "v2-safe-1-anchor",
+          "atMs": 24000,
+          "kind": "recovery",
+          "fromPhaseId": "v0-safe-1",
+          "toPhaseId": "v2-safe-1",
+          "fromKbps": 1292,
+          "toKbps": 4408
+        },
+        {
+          "id": "severe-1-anchor",
+          "atMs": 36000,
+          "kind": "adverse",
+          "fromPhaseId": "v2-safe-1",
+          "toPhaseId": "severe-1",
+          "fromKbps": 4408,
+          "toKbps": 711
+        },
+        {
+          "id": "high-2-anchor",
+          "atMs": 48000,
+          "kind": "recovery",
+          "fromPhaseId": "severe-1",
+          "toPhaseId": "high-2",
+          "fromKbps": 711,
+          "toKbps": 7045
+        },
+        {
+          "id": "v0-safe-2-anchor",
+          "atMs": 60000,
+          "kind": "adverse",
+          "fromPhaseId": "high-2",
+          "toPhaseId": "v0-safe-2",
+          "fromKbps": 7045,
+          "toKbps": 1292
+        },
+        {
+          "id": "v2-safe-2-anchor",
+          "atMs": 72000,
+          "kind": "recovery",
+          "fromPhaseId": "v0-safe-2",
+          "toPhaseId": "v2-safe-2",
+          "fromKbps": 1292,
+          "toKbps": 4408
+        },
+        {
+          "id": "severe-2-anchor",
+          "atMs": 84000,
+          "kind": "adverse",
+          "fromPhaseId": "v2-safe-2",
+          "toPhaseId": "severe-2",
+          "fromKbps": 4408,
+          "toKbps": 711
+        },
+        {
+          "id": "recovery-anchor",
+          "atMs": 96000,
+          "kind": "recovery",
+          "fromPhaseId": "severe-2",
+          "toPhaseId": "recovery",
+          "fromKbps": 711,
+          "toKbps": 7045
+        }
+      ]
+    }
+  ]
+}

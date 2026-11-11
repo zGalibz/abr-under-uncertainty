@@ -8,6 +8,7 @@
     "schemaVersion",
     "id",
     "description",
+    "status",
     "clock",
     "rateUnit",
     "responseStartDelayMs",

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://adaptive-hls.local/schemas/media-validation-report.schema.json",
+  "title": "Media validation report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "validatedAt", "gitCommit", "gitDirty", "packageManifestSha256", "valid", "checks", "errors", "warnings"],
+  "properties": {
+    "schemaVersion": {"const": "1.0.0"}, "validatedAt": {"type": "string", "format": "date-time"},
+    "gitCommit": {"type": "string", "pattern": "^[0-9a-f]{40}$"}, "gitDirty": {"type": "boolean"},
+    "packageManifestSha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "valid": {"type": "boolean"},
+    "checks": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["id", "passed", "details"], "properties": {"id": {"type": "string"}, "passed": {"type": "boolean"}, "details": {"type": "string"}}}},
+    "errors": {"type": "array", "items": {"type": "string"}}, "warnings": {"type": "array", "items": {"type": "string"}}
+  }
+}

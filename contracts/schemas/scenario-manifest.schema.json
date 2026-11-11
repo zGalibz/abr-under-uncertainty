@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://adaptive-hls.local/schemas/scenario-manifest.schema.json",
+  "type": "object", "additionalProperties": false,
+  "required": ["schemaVersion", "packageManifestSha256", "scenarios"],
+  "properties": {
+    "schemaVersion": {"const": "1.0.0"}, "packageManifestSha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "scenarios": {"type": "array", "minItems": 3, "items": {"type": "object", "additionalProperties": false, "required": ["id", "path", "sha256", "anchors"], "properties": {
+      "id": {"type": "string"}, "path": {"type": "string"}, "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+      "anchors": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["id", "atMs", "kind", "fromPhaseId", "toPhaseId", "fromKbps", "toKbps"], "properties": {
+        "id": {"type": "string"}, "atMs": {"type": "integer", "minimum": 0}, "kind": {"enum": ["adverse", "recovery"]},
+        "fromPhaseId": {"type": "string"}, "toPhaseId": {"type": "string"}, "fromKbps": {"type": "integer", "minimum": 1}, "toKbps": {"type": "integer", "minimum": 1}
+      }} }
+    }}}
+  }
+}

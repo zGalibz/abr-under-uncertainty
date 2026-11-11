@@ -68,6 +68,9 @@ The system is local-first so the live demonstration does not depend on public Wi
 4. [`docs/decisions/ADR-001-canonical-scope.md`](docs/decisions/ADR-001-canonical-scope.md) — decisions that resolve differences among the research drafts.
 5. [`contracts/openapi.yaml`](contracts/openapi.yaml) and [`contracts/schemas/`](contracts/schemas/) — initial machine-readable integration contracts. These remain **draft contracts** until all three members approve the `v0.1-contracts` milestone.
 6. [`docs/research/`](docs/research/) — detailed source-grounded architecture, hls.js/ABR, and evaluation research retained for traceability.
+7. [`docs/MEMBER1_IMPLEMENTATION.md`](docs/MEMBER1_IMPLEMENTATION.md) — completed media/networking design, measurements, commands, validation, and rationale.
+8. [`docs/MEMBER1_HANDOFF.md`](docs/MEMBER1_HANDOFF.md) — concise player/runner integration instructions.
+9. [`docs/MEMBER1_VERIFICATION.md`](docs/MEMBER1_VERIFICATION.md) — exact verification environment, hashes, commands, and observed gate results.
 
 ## Repository layout
 
@@ -120,12 +123,17 @@ See [`docs/GITHUB_WORKFLOW.md`](docs/GITHUB_WORKFLOW.md) for the full procedure.
 
 ## Current status
 
-Foundation only:
+Member 1 implementation complete and awaiting team review:
 
-- research is complete and retained;
-- the repository structure and collaboration contracts are prepared;
-- no encoder, server, player, policy, runner, analysis implementation, measured result, or presentation conclusion exists yet;
-- media-package hashes and final trace rates remain pending until Asadullah produces and validates the HLS ladder.
+- the four-rendition aligned HLS package is generated and validated;
+- source, package, segment, playlist, and scenario hashes are frozen;
+- measured peak/average rates replace the placeholder package hash;
+- the lifecycle API, telemetry ingestion, secure HLS server, and aggregate bandwidth shaper are implemented;
+- stable, gradual, and volatile scenarios are frozen from measured ladder thresholds;
+- physical loopback calibration passes every plateau and transition gate;
+- contract, media, server, security, concurrency, and calibration tests are automated in CI;
+- player, ABR-policy, runner, analysis, counted experiment, and presentation work remain pending;
+- no ABR comparison result or presentation conclusion exists yet.
 
 ## Sources
 
