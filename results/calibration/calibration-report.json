@@ -1,0 +1,209 @@
+{
+  "schemaVersion": "1.0.0",
+  "generatedAt": "2026-11-11T03:16:29.712Z",
+  "gitCommit": "7834f26d8685bd3838f5643d6fd3b7641aea0c9e",
+  "scenarioManifestSha256": "91048d006f673b854174e9ffa73a9e6e3bdc46a7a59c8a4a6ff286c767d5b03e",
+  "valid": true,
+  "scenarios": [
+    {
+      "id": "stable-v1-calibration",
+      "passed": true,
+      "plateaus": [
+        {
+          "phaseId": "high",
+          "targetKbps": 7045,
+          "medianMeasuredKbps": 7016.56,
+          "relativeError": -0.004036905606813286,
+          "passed": true
+        }
+      ],
+      "transitions": []
+    },
+    {
+      "id": "gradual-v1-calibration",
+      "passed": true,
+      "plateaus": [
+        {
+          "phaseId": "high",
+          "targetKbps": 7045,
+          "medianMeasuredKbps": 7011.216,
+          "relativeError": -0.004795457771469077,
+          "passed": true
+        },
+        {
+          "phaseId": "v2-safe",
+          "targetKbps": 4408,
+          "medianMeasuredKbps": 4407.984,
+          "relativeError": -0.000003629764065249921,
+          "passed": true
+        },
+        {
+          "phaseId": "v1-safe",
+          "targetKbps": 2409,
+          "medianMeasuredKbps": 2409.048,
+          "relativeError": 0.000019925280199159173,
+          "passed": true
+        },
+        {
+          "phaseId": "v0-safe",
+          "targetKbps": 1292,
+          "medianMeasuredKbps": 1291.984,
+          "relativeError": -0.0000123839009288517,
+          "passed": true
+        },
+        {
+          "phaseId": "severe",
+          "targetKbps": 711,
+          "medianMeasuredKbps": 711,
+          "relativeError": 0,
+          "passed": true
+        },
+        {
+          "phaseId": "recovery",
+          "targetKbps": 7045,
+          "medianMeasuredKbps": 7011.76,
+          "relativeError": -0.004718239886444256,
+          "passed": true
+        }
+      ],
+      "transitions": [
+        {
+          "anchorId": "v2-safe-anchor",
+          "errorMs": 0.045750000000225555,
+          "passed": true
+        },
+        {
+          "anchorId": "v1-safe-anchor",
+          "errorMs": 0.012208000001010078,
+          "passed": true
+        },
+        {
+          "anchorId": "v0-safe-anchor",
+          "errorMs": 0.049250000000029104,
+          "passed": true
+        },
+        {
+          "anchorId": "severe-anchor",
+          "errorMs": 0.05516600000191829,
+          "passed": true
+        },
+        {
+          "anchorId": "recovery-anchor",
+          "errorMs": 0.04575000000113505,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "id": "volatile-v1-calibration",
+      "passed": true,
+      "plateaus": [
+        {
+          "phaseId": "high-1",
+          "targetKbps": 7045,
+          "medianMeasuredKbps": 7011.464,
+          "relativeError": -0.00476025550035487,
+          "passed": true
+        },
+        {
+          "phaseId": "v0-safe-1",
+          "targetKbps": 1292,
+          "medianMeasuredKbps": 1292.008,
+          "relativeError": 0.00000619195046442585,
+          "passed": true
+        },
+        {
+          "phaseId": "v2-safe-1",
+          "targetKbps": 4408,
+          "medianMeasuredKbps": 4407.92,
+          "relativeError": -0.00001814882032666226,
+          "passed": true
+        },
+        {
+          "phaseId": "severe-1",
+          "targetKbps": 711,
+          "medianMeasuredKbps": 711.008,
+          "relativeError": 0.00001125175808725485,
+          "passed": true
+        },
+        {
+          "phaseId": "high-2",
+          "targetKbps": 7045,
+          "medianMeasuredKbps": 7011.736,
+          "relativeError": -0.004721646557842459,
+          "passed": true
+        },
+        {
+          "phaseId": "v0-safe-2",
+          "targetKbps": 1292,
+          "medianMeasuredKbps": 1292.016,
+          "relativeError": 0.0000123839009288517,
+          "passed": true
+        },
+        {
+          "phaseId": "v2-safe-2",
+          "targetKbps": 4408,
+          "medianMeasuredKbps": 4408.128,
+          "relativeError": 0.00002903811252261835,
+          "passed": true
+        },
+        {
+          "phaseId": "severe-2",
+          "targetKbps": 711,
+          "medianMeasuredKbps": 711.016,
+          "relativeError": 0.000022503516174349805,
+          "passed": true
+        },
+        {
+          "phaseId": "recovery",
+          "targetKbps": 7045,
+          "medianMeasuredKbps": 7009.848,
+          "relativeError": -0.004989638041163953,
+          "passed": true
+        }
+      ],
+      "transitions": [
+        {
+          "anchorId": "v0-safe-1-anchor",
+          "errorMs": 0.04816700000083074,
+          "passed": true
+        },
+        {
+          "anchorId": "v2-safe-1-anchor",
+          "errorMs": 0.04237499999726424,
+          "passed": true
+        },
+        {
+          "anchorId": "severe-1-anchor",
+          "errorMs": 0.01750000000174623,
+          "passed": true
+        },
+        {
+          "anchorId": "high-2-anchor",
+          "errorMs": 0.0141250000015134,
+          "passed": true
+        },
+        {
+          "anchorId": "v0-safe-2-anchor",
+          "errorMs": 0.04216699999960838,
+          "passed": true
+        },
+        {
+          "anchorId": "v2-safe-2-anchor",
+          "errorMs": 0.022124999995867256,
+          "passed": true
+        },
+        {
+          "anchorId": "severe-2-anchor",
+          "errorMs": 0.0036249999975552782,
+          "passed": true
+        },
+        {
+          "anchorId": "recovery-anchor",
+          "errorMs": 0.0030839999963063747,
+          "passed": true
+        }
+      ]
+    }
+  ]
+}

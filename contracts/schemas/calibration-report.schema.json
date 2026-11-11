@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://adaptive-hls.local/schemas/calibration-report.schema.json",
+  "type": "object", "additionalProperties": false,
+  "required": ["schemaVersion", "generatedAt", "gitCommit", "scenarioManifestSha256", "valid", "scenarios"],
+  "properties": {
+    "schemaVersion": {"const": "1.0.0"}, "generatedAt": {"type": "string", "format": "date-time"},
+    "gitCommit": {"type": "string", "pattern": "^[0-9a-f]{40}$"}, "scenarioManifestSha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "valid": {"type": "boolean"}, "scenarios": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["id", "passed", "plateaus", "transitions"], "properties": {
+      "id": {"type": "string"}, "passed": {"type": "boolean"},
+      "plateaus": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["phaseId", "targetKbps", "medianMeasuredKbps", "relativeError", "passed"], "properties": {
+        "phaseId": {"type": "string"}, "targetKbps": {"type": "integer"}, "medianMeasuredKbps": {"type": "number"}, "relativeError": {"type": "number"}, "passed": {"type": "boolean"}
+      }}},
+      "transitions": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["anchorId", "errorMs", "passed"], "properties": {"anchorId": {"type": "string"}, "errorMs": {"type": "number"}, "passed": {"type": "boolean"}}}}
+    }}}
+  }
+}
