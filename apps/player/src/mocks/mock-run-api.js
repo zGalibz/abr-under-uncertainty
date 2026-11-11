@@ -15,6 +15,7 @@ export class MockRunApi {
     const runId = `r_${uuidV7Like()}`;
     const run = { schemaVersion: '1.0.0', runId, requestId: input.requestId, status: 'CREATED', experimentId: input.experimentId,
       experimentSha256: SHA, scenarioId: input.scenarioId, scenarioSha256: SHA, packageSha256: SHA, repetition: input.repetition,
+      policyId: input.policyId, orderSeed: input.orderSeed, clientLabel: input.clientLabel, gitCommit: input.gitCommit, gitDirty: input.gitDirty,
       createdAt: new Date().toISOString(), startedAt: null, finishedAt: null, finishReason: null, warnings: ['MOCK API: no media server is connected'] };
     this.runs.set(runId, { run, events: new Map() });
     return run;
@@ -39,6 +40,12 @@ export class MockRunApi {
   async finishRun(runId, input) {
     const stored = this.require(runId);
     stored.run.status = 'COMPLETED'; stored.run.finishedAt = new Date().toISOString(); stored.run.finishReason = input.reason;
+    return stored.run;
+  }
+
+  async abortRun(runId, input) {
+    const stored = this.require(runId);
+    stored.run.status = 'ABORTED'; stored.run.finishedAt = new Date().toISOString(); stored.run.finishReason = input.reason;
     return stored.run;
   }
 

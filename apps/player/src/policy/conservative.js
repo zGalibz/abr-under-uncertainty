@@ -42,7 +42,7 @@ export function validateLadder(rawLevels) {
     height: Number(level.height),
     codecs: String(level.codecs ?? ''),
   })).sort((a, b) => a.bitrateBps - b.bitrateBps);
-  const codecFamily = levels[0].codecs.split(',')[0].trim();
+  const codecFamily = levels[0].codecs.split(',')[0].trim().split('.')[0].toLowerCase();
   for (let index = 0; index < levels.length; index += 1) {
     const level = levels[index];
     if (!Number.isInteger(level.index) || level.index < 0 || !Number.isFinite(level.bitrateBps) || level.bitrateBps <= 0 ||
@@ -52,7 +52,7 @@ export function validateLadder(rawLevels) {
     if (index > 0) {
       const previous = levels[index - 1];
       if (level.bitrateBps <= previous.bitrateBps || level.width < previous.width || level.height < previous.height ||
-          level.codecs.split(',')[0].trim() !== codecFamily) {
+          level.codecs.split(',')[0].trim().split('.')[0].toLowerCase() !== codecFamily) {
         throw new Error('invalid_ladder: not monotonic');
       }
     }

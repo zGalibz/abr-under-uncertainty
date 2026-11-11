@@ -8,6 +8,7 @@ const ladder = [
   { index: 2, bitrateBps: 1896000, width: 1280, height: 720, codecs: 'avc1.64001e,mp4a.40.2' },
   { index: 3, bitrateBps: 3296000, width: 1920, height: 1080, codecs: 'avc1.64001e,mp4a.40.2' },
 ];
+
 const snapshot = (buffer = 10) => ({ requestedLevel: 0, effectiveLevel: 0, forwardBufferSec: buffer });
 const fragment = (bps, retry = 0, extra = {}) => ({ bytes: bps / 8, loadStartMs: 0, loadEndMs: 1000, durationSec: 2, retry, type: 'main', ...extra });
 
@@ -22,6 +23,23 @@ test('request goodput includes the complete request duration and rejects invalid
 test('ladder requires increasing bitrate and dimensions', () => {
   assert.equal(validateLadder(ladder).length, 4);
   assert.throws(() => validateLadder([{ ...ladder[0] }, { ...ladder[1], bitrateBps: 596000 }]), /invalid_ladder/);
+});
+
+test('accepts actual H264 rendition codec profile-level identifiers', () => {
+  const actualLadder = [
+    { ...ladder[0], codecs: 'avc1.64001e,mp4a.40.2' },
+    { ...ladder[1], codecs: 'avc1.64001f,mp4a.40.2' },
+    { ...ladder[2], codecs: 'avc1.64001f,mp4a.40.2' },
+    { ...ladder[3], codecs: 'avc1.640028,mp4a.40.2' },
+  ];
+
+  assert.equal(validateLadder(actualLadder).length, 4);
+
+  const policy = new ConservativeThroughputPolicy();
+  const decision = policy.onManifest(actualLadder);
+
+  assert.equal(decision.reason, 'startup_lowest');
+  assert.equal(decision.toLevel, 0);
 });
 
 test('policy starts at lowest, upgrades only after three clean high-buffer fragments, and moves one rung', () => {

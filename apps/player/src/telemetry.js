@@ -32,7 +32,10 @@ export class TelemetryClient {
     this.lastMonoMs = 0;
     this.inFlight = null;
     this.failed = null;
-    this.timer = setInterval(() => { void this.flush(); }, flushIntervalMs);
+    // Timers have no caller to observe a rejection; retain the failed batch for
+    // close()/flushAll(), but never turn a transient network failure into an
+    // unhandled rejection.
+    this.timer = setInterval(() => { void this.flush().catch(() => {}); }, flushIntervalMs);
   }
 
   emit(type, data, mediaTimeSec) {

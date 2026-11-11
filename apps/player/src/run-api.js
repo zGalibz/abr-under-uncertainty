@@ -1,5 +1,5 @@
 export class HttpRunApi {
-  constructor({ baseUrl = '' } = {}) { this.baseUrl = baseUrl; }
+  constructor({ baseUrl = '' } = {}) { this.baseUrl = baseUrl.replace(/\/$/, ''); }
 
   async request(path, body) {
     const response = await fetch(`${this.baseUrl}${path}`, {
@@ -15,4 +15,11 @@ export class HttpRunApi {
   appendEvents(runId, input) { return this.request(`/api/v1/runs/${encodeURIComponent(runId)}/events`, input); }
   finishRun(runId, input) { return this.request(`/api/v1/runs/${encodeURIComponent(runId)}/finish`, input); }
   abortRun(runId, input) { return this.request(`/api/v1/runs/${encodeURIComponent(runId)}/abort`, input); }
+}
+
+/** Resolves the server-issued, run-scoped playlist path without changing it. */
+export function resolveRunHlsUrl(hlsUrl, serverBaseUrl, pageUrl = globalThis.location?.href) {
+  if (typeof hlsUrl !== 'string' || !hlsUrl.startsWith('/stream/v1/')) throw new Error('server returned an invalid run-scoped hlsUrl');
+  if (!serverBaseUrl && !pageUrl) throw new Error('a server base URL or browser location is required to resolve hlsUrl');
+  return new URL(hlsUrl, serverBaseUrl || pageUrl).href;
 }
