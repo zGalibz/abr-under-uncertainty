@@ -24,7 +24,7 @@
     "calibrate:scenarios": "npm run calibrate -w @abr-lab/shaper-server",
     "test:analysis": "node --test tests/contract/analysis-*.test.mjs",
     "fixtures:analysis": "node tests/fixtures/analysis/build-fixtures.mjs",
-    "synthetic": "node packages/analysis/src/synthetic/simulate.mjs && node packages/analysis/src/analyze.mjs --raw results/synthetic/raw --out results/synthetic",
+    "synthetic": "node packages/analysis/src/synthetic/simulate.mjs && node packages/analysis/src/analyze.mjs --raw results/synthetic/raw --out results/synthetic --order results/synthetic/run-order.json",
     "analyze": "node packages/analysis/src/analyze.mjs --raw results/raw --out results"
   },
   "devDependencies": {

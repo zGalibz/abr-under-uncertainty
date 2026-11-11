@@ -1,0 +1,6 @@
+{
+  "case": "server_aborted",
+  "why": "The runner aborted the run (status ABORTED). The server already knows the session was not clean: harness_invalid, nothing computed.",
+  "status": "harness_invalid",
+  "errorIncludes": "ABORTED"
+}

@@ -5,29 +5,23 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { test } from 'node:test';
-import { loadRun, readJson, repoRoot } from '../../packages/analysis/src/io.mjs';
-import { reduceRun } from '../../packages/analysis/src/reduce.mjs';
+import { loadContext } from '../../packages/analysis/src/context.mjs';
+import { evaluateRun } from '../../packages/analysis/src/evaluate.mjs';
+import { listRunDirs, loadRun, readJson, repoRoot } from '../../packages/analysis/src/io.mjs';
+import { FIXTURE_CONTEXT } from '../fixtures/analysis/build-fixtures.mjs';
 import { median, percentile, sampleSd } from '../../packages/analysis/src/stats.mjs';
 import { buildPairedDeltas } from '../../packages/analysis/src/summarize.mjs';
-import { validateHarness, validateStructure } from '../../packages/analysis/src/validate.mjs';
 
 const casesDir = path.join(repoRoot, 'tests/fixtures/analysis/cases');
 const cases = fs.readdirSync(casesDir).sort();
-
-function evaluate(dir) {
-  const loaded = loadRun(dir);
-  const structural = validateStructure(loaded);
-  if (structural.length) return { status: 'rejected', errors: structural, warnings: [] };
-  const reduced = reduceRun(loaded);
-  const harness = validateHarness(loaded, reduced);
-  return { status: harness.problems.length ? 'harness_invalid' : 'valid', errors: harness.problems, warnings: harness.warnings, reduced };
-}
+const ctx = loadContext(FIXTURE_CONTEXT);
 
 for (const name of cases) {
   test(`fixture ${name}`, () => {
-    const dir = path.join(casesDir, name);
-    const expected = readJson(path.join(dir, 'expected.json'));
-    const got = evaluate(dir);
+    const caseDir = path.join(casesDir, name);
+    const expected = readJson(path.join(caseDir, 'expected.json'));
+    const [runDir] = listRunDirs(caseDir);
+    const got = evaluateRun(loadRun(runDir), ctx);
     assert.equal(got.status, expected.status, `status; errors: ${got.errors.join(' | ')}`);
     if (expected.errorIncludes) assert.ok(got.errors.some((e) => e.includes(expected.errorIncludes)), got.errors.join(' | '));
     if (expected.warningIncludes) assert.ok(got.warnings.some((w) => w.includes(expected.warningIncludes)), got.warnings.join(' | '));

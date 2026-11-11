@@ -25,7 +25,9 @@ export function readNdjson(file) {
   return { events, parseErrors };
 }
 
-// A raw run directory is results/raw/<run_id>/ containing run.json and events.ndjson.
+// A raw run directory is results/raw/<run_id>/ as written by Galib's server:
+// run.json, events.ndjson (player telemetry), server-requests.ndjson and
+// scheduler-writes.ndjson.
 export function listRunDirs(rawDir) {
   if (!fs.existsSync(rawDir)) return [];
   return fs.readdirSync(rawDir, { withFileTypes: true })
@@ -34,15 +36,33 @@ export function listRunDirs(rawDir) {
     .sort();
 }
 
+export const RAW_ARTIFACTS = ['events.ndjson', 'server-requests.ndjson', 'scheduler-writes.ndjson'];
+
 export function loadRun(runDir) {
   const run = readJson(path.join(runDir, 'run.json'));
   const eventsFile = path.join(runDir, 'events.ndjson');
   const { events, parseErrors } = fs.existsSync(eventsFile)
     ? readNdjson(eventsFile)
     : { events: [], parseErrors: ['events.ndjson is missing'] };
-  const scenario = run.scenarioFile ? readJson(path.resolve(repoRoot, run.scenarioFile)) : null;
-  const rawSha256 = fs.existsSync(eventsFile) ? sha256File(eventsFile) : null;
-  return { dir: runDir, run, events, parseErrors, scenario, rawSha256 };
+  const requestsFile = path.join(runDir, 'server-requests.ndjson');
+  const requests = fs.existsSync(requestsFile) ? readNdjson(requestsFile) : null;
+  if (requests) parseErrors.push(...requests.parseErrors.map((e) => `server-requests.ndjson ${e}`));
+  // Current hash of every raw artifact, to compare with the hashes the
+  // server recorded in run.json when it finalized the run.
+  const fileHashes = {};
+  for (const name of RAW_ARTIFACTS) {
+    const file = path.join(runDir, name);
+    if (fs.existsSync(file)) fileHashes[name] = sha256File(file);
+  }
+  return {
+    dir: runDir,
+    run,
+    events,
+    serverRequests: requests ? requests.events : null,
+    parseErrors,
+    fileHashes,
+    rawSha256: fileHashes['events.ndjson'] ?? null,
+  };
 }
 
 // Not-applicable and unobserved values are written as NA, never as 0.

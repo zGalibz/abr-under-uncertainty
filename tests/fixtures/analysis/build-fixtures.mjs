@@ -7,13 +7,24 @@
 // whose numbers were worked out BY HAND from the script below — not by
 // running the reducer. The reducer test then checks the reducer agrees.
 //
-// Shared clock for every case: play request at client 1000 ms, which is
-// also scenario time 0 (clientMonoAtScenarioZeroMs = 1000).
+// Shared clock for every case: the player sends /start and requests play at
+// client 1000 ms, which is also server scenario time 0. Server request times
+// (acceptedAtRunMs) are therefore client time − 1000.
+//
+// Files are written in exactly the shape Galib's server produces:
+//   cases/<case>/<runId>/{run.json, events.ndjson, server-requests.ndjson, scheduler-writes.ndjson}
+//   cases/<case>/expected.json
+// and are checked against the fixture apparatus in context/ (a 20 s, four-
+// level placeholder package and two test scenarios).
 
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { EventLog, PLACEHOLDER_LADDER, clientReadyData, fakeRunId, toNdjson, urlPath } from '../../../packages/analysis/src/synthetic/eventlog.mjs';
+import { sha256Canonical } from '../../../packages/shaper-server/src/domain/canonical-json.mjs';
+import { loadContext } from '../../../packages/analysis/src/context.mjs';
+import { RAW_ARTIFACTS, readJson, repoRoot, sha256File } from '../../../packages/analysis/src/io.mjs';
+import { EPOCH_BASE_MS, EventLog, PLACEHOLDER_LADDER, clientReadyData, fakeRunId, toNdjson, urlPath } from '../../../packages/analysis/src/synthetic/eventlog.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const Z = 1000;
@@ -23,6 +34,7 @@ const CLIP_SEC = 20;
 function script({ seed, startupMs = 500, pieces, terminal = 'ended', levelForSn = () => 3, extra = [], dropSamples = null, startupDupWaitingAt = [] }) {
   const runId = fakeRunId(seed);
   const log = new EventLog(runId);
+  const requests = [];
   const ld = (l) => PLACEHOLDER_LADDER[l];
   log.emit(100, 'client.ready', clientReadyData());
   log.emit(900, 'hls.manifest_parsed', { levels: PLACEHOLDER_LADDER, firstLevel: 0 });
@@ -63,6 +75,12 @@ function script({ seed, startupMs = 500, pieces, terminal = 'ended', levelForSn 
     log.emit(loadAt, 'hls.frag_loading', { level, sn, startSec: sn * SEG, durationSec: SEG, urlPath: urlPath(runId, level, sn) });
     log.emit(loadAt + 390, 'hls.frag_loaded', { level, sn, bytes: 500000, loadStartMs: loadAt, firstByteMs: loadAt + 30, loadEndMs: loadAt + 390 });
     log.emit(loadAt + 400, 'hls.frag_buffered', { level, sn, bytes: 500000, bandwidthEstimateBps: 6000000 });
+    requests.push({
+      schemaVersion: '1.0.0', runId, requestSeq: requests.length, method: 'GET', path: `v${level}/seg_${String(sn).padStart(5, '0')}.ts`,
+      range: null, status: 200, phaseAtAccept: null, acceptedAtRunMs: loadAt - Z, eligibleAtRunMs: loadAt - Z + 20,
+      firstByteAtRunMs: loadAt - Z + 30, lastByteAtRunMs: loadAt - Z + 385, representationBytes: 500000, bodyBytesWritten: 500000,
+      aborted: false, abortCode: null, backpressureWaitMs: 0,
+    });
     log.emit(shown, 'hls.frag_changed', { level, sn, startSec: sn * SEG, durationSec: SEG, bitrateBps: ld(level).bitrateBps, width: ld(level).width, height: ld(level).height }, sn * SEG);
   }
 
@@ -86,11 +104,12 @@ function script({ seed, startupMs = 500, pieces, terminal = 'ended', levelForSn 
     log.emit(tEnd, 'hls.error', { fatal: true, errorType: 'networkError', details: 'fragLoadError', httpStatus: 503 });
     log.emit(tEnd + 50, 'client.finished', { reason: 'fatal_error', droppedVideoFrames: 0, totalVideoFrames: 300 });
   }
-  return { runId, events: log.finalize() };
+  requests.sort((a, b) => a.acceptedAtRunMs - b.acceptedAtRunMs).forEach((r, i) => { r.requestSeq = i; });
+  return { runId, events: log.finalize(), serverRequests: requests };
 }
 
-const STABLE = 'tests/fixtures/analysis/scenario.stable.json';
-const DROP = 'tests/fixtures/analysis/scenario.drop.json';
+const STABLE = 'fixture-stable';
+const DROP = 'fixture-drop';
 const fullPlay = [{ play: 20000 }];
 const oneStall = [{ play: 8100 }, { stall: 1500 }, { play: 11900 }];
 
@@ -266,22 +285,96 @@ const CASES = [
     build: { seed: 17, pieces: fullPlay, dropSamples: [5000, 15000] },
     expected: { status: 'harness_invalid', errorIncludes: 'coverage', metrics: { sample_coverage: 0.5125 } },
   },
+  {
+    name: 'invalid_tampered_after_finish',
+    why: 'events.ndjson was edited after the server hashed it at finish time. Evidence can no longer be trusted: rejected.',
+    build: { seed: 18, pieces: fullPlay },
+    tamper: (text) => text.replace('"forwardBufferSec":6', '"forwardBufferSec":9'),
+    expected: { status: 'rejected', errorIncludes: 'modified after the run finished' },
+  },
+  {
+    name: 'server_aborted',
+    why: 'The runner aborted the run (status ABORTED). The server already knows the session was not clean: harness_invalid, nothing computed.',
+    build: { seed: 19, pieces: fullPlay },
+    runOverrides: { status: 'ABORTED', finishReason: 'browser crashed' },
+    expected: { status: 'harness_invalid', errorIncludes: 'ABORTED' },
+  },
 ];
 
+export const FIXTURE_CONTEXT = {
+  experiment: 'tests/fixtures/analysis/context/experiment.json',
+  scenarioManifest: 'tests/fixtures/analysis/context/scenario-manifest.json',
+  packageManifest: 'tests/fixtures/analysis/context/media-package.json',
+};
+
+// Fixture apparatus: same shapes as Galib's real files, tiny values.
+function writeContext() {
+  const dir = path.join(here, 'context');
+  fs.mkdirSync(dir, { recursive: true });
+  const experiment = readJson(path.join(repoRoot, 'configs/experiment.v1.json'));
+  experiment.id = 'fixture-experiment';
+  experiment.scenarioFiles = ['tests/fixtures/analysis/scenario.stable.json', 'tests/fixtures/analysis/scenario.drop.json'];
+  const pkg = {
+    schemaVersion: '1.0.0',
+    assetId: 'fixture',
+    durationSeconds: CLIP_SEC,
+    renditions: PLACEHOLDER_LADDER.map((l) => ({ id: `v${l.level}`, width: l.width, height: l.height, measuredPeakBps: l.bitrateBps, measuredAverageBps: l.averageBitrateBps, codecs: l.codecs })),
+  };
+  const pkgText = `${JSON.stringify(pkg, null, 2)}\n`;
+  experiment.packageManifestSha256 = crypto.createHash('sha256').update(pkgText).digest('hex');
+  const scen = (file) => readJson(path.join(repoRoot, file));
+  const manifest = {
+    schemaVersion: '1.0.0',
+    packageManifestSha256: experiment.packageManifestSha256,
+    scenarios: [
+      { id: 'fixture-stable', path: experiment.scenarioFiles[0], sha256: sha256Canonical(scen(experiment.scenarioFiles[0])), anchors: [] },
+      {
+        id: 'fixture-drop',
+        path: experiment.scenarioFiles[1],
+        sha256: sha256Canonical(scen(experiment.scenarioFiles[1])),
+        anchors: [
+          { id: 'low-anchor', atMs: 10000, kind: 'adverse', fromPhaseId: 'high', toPhaseId: 'low', fromKbps: 6000, toKbps: 1200 },
+          { id: 'recovery-anchor', atMs: 20000, kind: 'recovery', fromPhaseId: 'low', toPhaseId: 'recovery', fromKbps: 1200, toKbps: 6000 },
+        ],
+      },
+    ],
+  };
+  fs.writeFileSync(path.join(dir, 'experiment.json'), `${JSON.stringify(experiment, null, 2)}\n`);
+  fs.writeFileSync(path.join(dir, 'media-package.json'), pkgText);
+  fs.writeFileSync(path.join(dir, 'scenario-manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);
+}
+
 export function buildAll(outDir = here) {
+  writeContext();
+  const ctx = loadContext(FIXTURE_CONTEXT);
+  fs.rmSync(path.join(outDir, 'cases'), { recursive: true, force: true });
   for (const c of CASES) {
-    const dir = path.join(outDir, 'cases', c.name);
-    fs.rmSync(dir, { recursive: true, force: true });
+    const caseDir = path.join(outDir, 'cases', c.name);
+    const { runId, events, serverRequests } = script(c.build);
+    const dir = path.join(caseDir, runId);
     fs.mkdirSync(dir, { recursive: true });
-    const { runId, events } = script(c.build);
     const finalEvents = c.mutate ? c.mutate(events) : events;
-    fs.writeFileSync(path.join(dir, 'run.json'), `${JSON.stringify({
-      schemaVersion: '1.0.0', synthetic: true, runId, experimentId: 'fixture', policyId: 'default-hlsjs',
-      scenarioId: c.scenario === DROP ? 'fixture-drop' : 'fixture-stable', scenarioFile: c.scenario ?? STABLE,
-      repetition: 1, orderIndex: 1, clientMonoAtScenarioZeroMs: Z,
-    }, null, 2)}\n`);
     fs.writeFileSync(path.join(dir, 'events.ndjson'), toNdjson(finalEvents));
-    fs.writeFileSync(path.join(dir, 'expected.json'), `${JSON.stringify({ case: c.name, why: c.why, ...c.expected }, null, 2)}\n`);
+    fs.writeFileSync(path.join(dir, 'server-requests.ndjson'), toNdjson(serverRequests));
+    fs.writeFileSync(path.join(dir, 'scheduler-writes.ndjson'), '');
+    const artifacts = Object.fromEntries(RAW_ARTIFACTS.map((name) => [name, sha256File(path.join(dir, name))]));
+    const scenarioId = c.scenario ?? STABLE;
+    const iso = (ms) => new Date(EPOCH_BASE_MS + ms).toISOString();
+    const run = {
+      schemaVersion: '1.0.0', runId, requestId: '00000000-0000-4000-8000-0000000000' + String(c.build.seed).padStart(2, '0'),
+      status: 'COMPLETED', experimentId: ctx.experiment.id, experimentSha256: ctx.experimentSha256, scenarioId,
+      scenarioSha256: ctx.scenarios.get(scenarioId).computedSha256, packageSha256: ctx.packageSha256, policyId: 'default-hlsjs',
+      repetition: 1, orderSeed: 1, clientLabel: 'synthetic-fixture', gitCommit: '0'.repeat(40), gitDirty: false,
+      createdAt: iso(0), startedAt: iso(Z), finishedAt: iso(30000), finishReason: 'ended', failureCode: null, warnings: [], artifacts,
+      startRequest: { clientSendEpochMs: EPOCH_BASE_MS + Z, clientSendMonoMs: Z }, serverRunStartEpochMs: EPOCH_BASE_MS + Z, serverRunStartMonoMs: 5000,
+      ...c.runOverrides,
+    };
+    fs.writeFileSync(path.join(dir, 'run.json'), `${JSON.stringify(run, null, 2)}\n`);
+    if (c.tamper) {
+      const file = path.join(dir, 'events.ndjson');
+      fs.writeFileSync(file, c.tamper(fs.readFileSync(file, 'utf8')));
+    }
+    fs.writeFileSync(path.join(caseDir, 'expected.json'), `${JSON.stringify({ case: c.name, why: c.why, ...c.expected }, null, 2)}\n`);
   }
   return CASES.map((c) => c.name);
 }

@@ -13,7 +13,6 @@ export const CONFIRM_PROGRESS_SEC = 0.05;
 export const LOW_BUFFER_SEC = 0.5;
 export const MAX_SAMPLE_GAP_MS = 500;
 export const EVAL_SAFETY_FACTOR = 0.85; // γ_eval used only to place reaction anchors
-export const NOMINAL_SEGMENT_SEC = 2;
 
 const t = (e) => e.clientMonoMs;
 
@@ -45,34 +44,32 @@ function safeLevel(ladder, capacityBps) {
   return safe;
 }
 
-// Reaction anchors: every phase boundary where the safe level drops and the
-// new phase lasts at least one segment. Anchors are evaluator metadata only;
-// neither ABR policy ever sees them.
-export function computeAnchors(scenario, ladder) {
-  if (!scenario || ladder.length === 0) return [];
-  const anchors = [];
-  const phases = scenario.phases;
-  for (let k = 1; k < phases.length; k += 1) {
-    const before = phases[k - 1];
-    const after = phases[k];
-    const safeBefore = safeLevel(ladder, before.downlinkKbps * 1000);
-    const safeAfter = safeLevel(ladder, after.downlinkKbps * 1000);
-    const plateauMs = after.endMs === undefined ? Infinity : after.endMs - after.startMs;
-    if (safeAfter < safeBefore && plateauMs >= NOMINAL_SEGMENT_SEC * 1000) {
-      anchors.push({
-        anchor_id: `${scenario.id}-a${anchors.length + 1}`,
-        t_rel_ms: after.startMs,
-        plateau_end_ms: after.endMs ?? null,
-        capacity_before_bps: before.downlinkKbps * 1000,
-        capacity_after_bps: after.downlinkKbps * 1000,
+// Reaction anchors come from Galib's scenario manifest (configs/scenarios/
+// manifest.json). Only "adverse" anchors where the safe level actually drops
+// are scored. The safe level uses the same γ = 0.85 rule Galib's trace
+// compiler used, applied to the measured peak bitrates. Anchors are
+// evaluator metadata only; neither ABR policy ever sees them.
+export function anchorsFor(scenarioEntry, ladder) {
+  if (!scenarioEntry || ladder.length === 0) return [];
+  const phases = scenarioEntry.scenario.phases;
+  return scenarioEntry.anchors
+    .filter((a) => a.kind === 'adverse')
+    .map((a) => {
+      const safeBefore = safeLevel(ladder, a.fromKbps * 1000);
+      const safeAfter = safeLevel(ladder, a.toKbps * 1000);
+      return {
+        anchor_id: a.id,
+        t_rel_ms: a.atMs,
+        plateau_end_ms: phases.find((p) => p.id === a.toPhaseId)?.endMs ?? null,
+        capacity_before_bps: a.fromKbps * 1000,
+        capacity_after_bps: a.toKbps * 1000,
         safe_level_before: safeBefore,
         safe_level_after: safeAfter,
         // When nothing is safe (−1) the best a policy can do is the lowest level.
         target_level: Math.max(safeAfter, 0),
-      });
-    }
-  }
-  return anchors;
+      };
+    })
+    .filter((a) => a.safe_level_after < a.safe_level_before);
 }
 
 function findTerminal(events) {
@@ -206,41 +203,61 @@ function reduceBuffer(events, tFirst, tTerminal) {
   };
 }
 
+const SEGMENT_PATH = /(?:^|\/)v(\d+)\/seg_(\d+)\.ts$/;
+
+// Media requests from server-requests.ndjson, timed on the server's
+// scenario clock (acceptedAtRunMs), so no client/server clock mapping is
+// needed for reaction time.
+export function mediaRequests(serverRequests) {
+  return (serverRequests ?? [])
+    .filter((r) => r.method === 'GET' && SEGMENT_PATH.test(r.path))
+    .map((r) => {
+      const [, level, sn] = r.path.match(SEGMENT_PATH);
+      const complete = !r.aborted && (r.status === 200 || r.status === 206) && r.bodyBytesWritten === r.representationBytes;
+      return { level: Number(level), sn: Number(sn), atMs: r.acceptedAtRunMs, complete };
+    })
+    .sort((a, b) => a.atMs - b.atMs);
+}
+
 // Reaction time per anchor (framework §4.6): time from the capacity drop to
-// the first request at or below the new safe level that is later buffered.
-function reduceReactions(events, anchors, run, tTerminal) {
-  const zero = run.clientMonoAtScenarioZeroMs;
-  if (typeof zero !== 'number' || anchors.length === 0) return [];
-  const rel = (e) => t(e) - zero;
-  const loads = events.filter((e) => e.type === 'hls.frag_loading');
-  const buffered = events.filter((e) => e.type === 'hls.frag_buffered');
-  const terminalRel = tTerminal - zero;
+// the first media request at or below the new safe level that completed and
+// was buffered by the player.
+function reduceReactions(events, anchors, run, serverRequests, terminalRunMs) {
+  if (anchors.length === 0 || !serverRequests) return [];
+  const requests = mediaRequests(serverRequests);
+  const buffered = new Set(events.filter((e) => e.type === 'hls.frag_buffered').map((e) => `${e.data.level}:${e.data.sn}`));
   const results = [];
   for (const a of anchors) {
     const base = { run_id: run.runId, ...a };
-    if (terminalRel < a.t_rel_ms) {
-      results.push({ ...base, status: 'not_reached', reaction_s: null, censored: false, proactive_or_already_safe: false });
+    if (terminalRunMs < a.t_rel_ms) {
+      results.push({ ...base, status: 'not_reached', level_pre: null, reaction_s: null, censored: false, proactive_or_already_safe: false });
       continue;
     }
-    const plateauEnd = Math.min(a.plateau_end_ms ?? Infinity, terminalRel);
-    const pre = loads.filter((e) => rel(e) < a.t_rel_ms).at(-1);
-    if (pre && pre.data.level <= a.target_level) {
-      results.push({ ...base, status: 'ok', level_pre: pre.data.level, reaction_s: 0, censored: false, proactive_or_already_safe: true });
+    const plateauEnd = Math.min(a.plateau_end_ms ?? Infinity, terminalRunMs);
+    const pre = requests.filter((r) => r.atMs < a.t_rel_ms).at(-1);
+    if (pre && pre.level <= a.target_level) {
+      results.push({ ...base, status: 'ok', level_pre: pre.level, reaction_s: 0, censored: false, proactive_or_already_safe: true });
       continue;
     }
-    const hit = loads.find((e) => rel(e) >= a.t_rel_ms && rel(e) < plateauEnd && e.data.level <= a.target_level
-      && buffered.some((b) => b.data.sn === e.data.sn && b.data.level === e.data.level && t(b) >= t(e)));
+    const hit = requests.find((r) => r.atMs >= a.t_rel_ms && r.atMs < plateauEnd && r.level <= a.target_level
+      && r.complete && buffered.has(`${r.level}:${r.sn}`));
     results.push(hit
-      ? { ...base, status: 'ok', level_pre: pre?.data.level ?? null, reaction_s: (rel(hit) - a.t_rel_ms) / 1000, censored: false, proactive_or_already_safe: false }
-      : { ...base, status: 'censored', level_pre: pre?.data.level ?? null, reaction_s: null, censored: true, proactive_or_already_safe: false });
+      ? { ...base, status: 'ok', level_pre: pre?.level ?? null, reaction_s: (hit.atMs - a.t_rel_ms) / 1000, censored: false, proactive_or_already_safe: false }
+      : { ...base, status: 'censored', level_pre: pre?.level ?? null, reaction_s: null, censored: true, proactive_or_already_safe: false });
   }
   return results;
 }
 
-export function reduceRun({ run, events: unsorted, scenario }) {
+// The player's clock reading when the server's scenario clock started.
+// The player sends clientSendMonoMs with /start and the server fixes run zero
+// on receipt; on loopback the gap is a few ms, so this is used only to place
+// client events on the scenario time axis (charts, "anchor reached" checks).
+export const clientMonoAtRunZero = (run) => run.startRequest?.clientSendMonoMs ?? null;
+
+export function reduceRun({ run, events: unsorted, serverRequests }, ctx) {
   const events = [...unsorted].sort((a, b) => a.seq - b.seq);
-  const ladder = ladderFromEvents(events);
-  const anchors = computeAnchors(scenario, ladder);
+  const { ladder } = ctx;
+  const anchors = anchorsFor(ctx.scenarios.get(run.scenarioId), ladder);
   const finished = events.find((e) => e.type === 'client.finished');
   const terminal = findTerminal(events);
   const tTerminal = terminal ? t(terminal) : (events.at(-1) ? t(events.at(-1)) : 0);
@@ -261,7 +278,8 @@ export function reduceRun({ run, events: unsorted, scenario }) {
   const sw = reduceSwitches(played);
 
   const buffer = started ? reduceBuffer(events, tFirst, tTerminal) : { mean: null, p05: null, lowFraction: null, coverage: null, gaps: 0 };
-  const reactions = reduceReactions(events, anchors, run, tTerminal);
+  const zero = clientMonoAtRunZero(run);
+  const reactions = reduceReactions(events, anchors, run, serverRequests, zero === null ? Infinity : tTerminal - zero);
   const reacted = reactions.filter((r) => r.status !== 'not_reached');
   const reactionValues = reacted.filter((r) => !r.censored).map((r) => r.reaction_s);
 
@@ -270,7 +288,6 @@ export function reduceRun({ run, events: unsorted, scenario }) {
     policy_id: run.policyId,
     trace_id: run.scenarioId,
     repeat_id: run.repetition,
-    order_index: run.orderIndex ?? null,
     started,
     completed,
     terminal_reason: finished?.data.reason ?? 'missing',

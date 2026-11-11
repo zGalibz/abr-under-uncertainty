@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "1.0.0",
+  "packageManifestSha256": "32d9e7faa70ad4b489abd6c5e4e2ffdd1a11aeb9f93ce3e4723aeda01d5783e9",
+  "scenarios": [
+    {
+      "id": "fixture-stable",
+      "path": "tests/fixtures/analysis/scenario.stable.json",
+      "sha256": "3f53a539110a235ef02d56a089f240273d6e9faadc89048d9a7784bef9254709",
+      "anchors": []
+    },
+    {
+      "id": "fixture-drop",
+      "path": "tests/fixtures/analysis/scenario.drop.json",
+      "sha256": "80100d7daf47b97dda473d5d297956da5e8c3c2b5f03973d4cc9d22ef520aac5",
+      "anchors": [
+        {
+          "id": "low-anchor",
+          "atMs": 10000,
+          "kind": "adverse",
+          "fromPhaseId": "high",
+          "toPhaseId": "low",
+          "fromKbps": 6000,
+          "toKbps": 1200
+        },
+        {
+          "id": "recovery-anchor",
+          "atMs": 20000,
+          "kind": "recovery",
+          "fromPhaseId": "low",
+          "toPhaseId": "recovery",
+          "fromKbps": 1200,
+          "toKbps": 6000
+        }
+      ]
+    }
+  ]
+}
