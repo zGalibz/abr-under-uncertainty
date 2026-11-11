@@ -97,13 +97,22 @@ function lineage(runs) {
   return prev;
 }
 
-export async function analyze({ rawDir, outDir, contextFiles, orderFile, charts = true, log = console.log }) {
+// Warm-up and dry runs share results/raw with counted runs (the server has
+// one results root), so they are told apart by the runner's clientLabel.
+export const NOT_COUNTED_LABELS = ['runner-warmup', 'runner-dry-run'];
+
+export async function analyze({ rawDir, outDir, contextFiles, orderFile, labels = null, charts = true, log = console.log }) {
   const ctx = loadContext(contextFiles);
   const orderOf = orderLookup(orderFile);
   const runDirs = listRunDirs(rawDir);
   log(`Found ${runDirs.length} run(s) in ${path.relative(repoRoot, rawDir) || rawDir}`);
 
-  const loadedRuns = runDirs.map(loadRun);
+  const keep = (run) => (labels ? labels.includes(run.clientLabel) : !NOT_COUNTED_LABELS.includes(run.clientLabel));
+  const allRuns = runDirs.map(loadRun);
+  const loadedRuns = allRuns.filter((l) => keep(l.run));
+  if (loadedRuns.length !== allRuns.length) {
+    log(`Skipping ${allRuns.length - loadedRuns.length} run(s) by label (${labels ? `keeping only ${labels.join(', ')}` : `not counted: ${NOT_COUNTED_LABELS.join(', ')}`})`);
+  }
   const rerunOf = lineage(loadedRuns.map((l) => l.run));
   const results = [];
   const runRows = [];
@@ -180,6 +189,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       raw: { type: 'string', default: 'results/raw' },
       out: { type: 'string', default: 'results' },
       order: { type: 'string' },
+      labels: { type: 'string' }, // comma-separated clientLabels to keep, e.g. runner-dry-run
       'no-charts': { type: 'boolean', default: false },
     },
   });
@@ -188,6 +198,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     rawDir: resolve(values.raw),
     outDir: resolve(values.out),
     orderFile: values.order ? resolve(values.order) : null,
+    labels: values.labels ? values.labels.split(',') : null,
     charts: !values['no-charts'],
   });
   process.exitCode = report.counts.rejected > 0 || report.matrix.errors.length > 0 ? 1 : 0;

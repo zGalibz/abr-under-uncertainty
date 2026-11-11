@@ -15,6 +15,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { parseArgs } from 'node:util';
+import { runOrder } from '../../../runner/src/order.mjs';
 import { loadContext } from '../context.mjs';
 import { RAW_ARTIFACTS, repoRoot, sha256File } from '../io.mjs';
 import { EPOCH_BASE_MS, EventLog, clientReadyData, fakeRunId, rng, toNdjson, urlPath } from './eventlog.mjs';
@@ -271,22 +272,6 @@ export function simulateRun({ runId, policyId, scenario, ladder, durationSec, se
 }
 
 // --- whole dataset ---------------------------------------------------------
-
-// Fixed randomized run order from the experiment seed (Fisher–Yates).
-export function runOrder(experiment, traces) {
-  const cells = [];
-  for (const trace of traces) {
-    for (const policy of experiment.player.policies) {
-      for (let rep = 1; rep <= experiment.execution.repetitionsPerCell; rep += 1) cells.push({ policy, trace, repetition: rep });
-    }
-  }
-  const r = rng(experiment.execution.orderSeed);
-  for (let i = cells.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(r() * (i + 1));
-    [cells[i], cells[j]] = [cells[j], cells[i]];
-  }
-  return cells.map((c, i) => ({ orderIndex: i + 1, ...c }));
-}
 
 const fakeHex = (seed, n) => { const r = rng(seed); return Array.from({ length: n }, () => Math.floor(r() * 16).toString(16)).join(''); };
 const fakeUuid = (seed) => { const h = fakeHex(seed, 32); return `${h.slice(0, 8)}-${h.slice(8, 12)}-4${h.slice(13, 16)}-8${h.slice(17, 20)}-${h.slice(20, 32)}`; };
