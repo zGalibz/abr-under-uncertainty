@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://adaptive-hls.local/schemas/server-request.schema.json",
+  "type": "object", "additionalProperties": false,
+  "required": ["schemaVersion", "runId", "requestSeq", "method", "path", "range", "status", "phaseAtAccept", "acceptedAtRunMs", "eligibleAtRunMs", "firstByteAtRunMs", "lastByteAtRunMs", "representationBytes", "bodyBytesWritten", "aborted", "abortCode", "backpressureWaitMs"],
+  "properties": {
+    "schemaVersion": {"const": "1.0.0"}, "runId": {"type": "string"}, "requestSeq": {"type": "integer", "minimum": 0},
+    "method": {"enum": ["GET", "HEAD"]}, "path": {"type": "string"}, "range": {"type": ["string", "null"]},
+    "status": {"type": "integer", "minimum": 100, "maximum": 599}, "phaseAtAccept": {"type": ["string", "null"]},
+    "acceptedAtRunMs": {"type": "number", "minimum": 0}, "eligibleAtRunMs": {"type": "number", "minimum": 0},
+    "firstByteAtRunMs": {"type": ["number", "null"], "minimum": 0}, "lastByteAtRunMs": {"type": ["number", "null"], "minimum": 0},
+    "representationBytes": {"type": "integer", "minimum": 0}, "bodyBytesWritten": {"type": "integer", "minimum": 0},
+    "aborted": {"type": "boolean"}, "abortCode": {"type": ["string", "null"]}, "backpressureWaitMs": {"type": "number", "minimum": 0}
+  }
+}

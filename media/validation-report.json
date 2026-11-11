@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "1.0.0",
+  "validatedAt": "2026-11-10T20:37:21.322Z",
+  "gitCommit": "7834f26d8685bd3838f5643d6fd3b7641aea0c9e",
+  "gitDirty": true,
+  "packageManifestSha256": "a8c65b415d4729f84e1a17f6882623a47e2e3f1b0f24739c07224d7a96201158",
+  "valid": true,
+  "checks": [
+    {
+      "id": "manifest-readable",
+      "passed": true,
+      "details": "package.json parsed"
+    },
+    {
+      "id": "file-hashes",
+      "passed": true,
+      "details": "265 payload files checked"
+    },
+    {
+      "id": "media-structure",
+      "passed": true,
+      "details": "four aligned decodable renditions verified"
+    }
+  ],
+  "errors": [],
+  "warnings": []
+}

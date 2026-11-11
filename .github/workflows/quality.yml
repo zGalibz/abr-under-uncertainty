@@ -1,0 +1,52 @@
+name: Member 1 quality gates
+
+on:
+  push:
+    branches: [main, "feat/**", "fix/**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install FFmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Install exact dependencies
+        run: npm ci
+
+      - name: Validate contracts and frozen manifests
+        run: npm run check:foundation
+
+      - name: Lint OpenAPI
+        run: npx --yes @redocly/cli@2.77.0 lint contracts/openapi.yaml
+
+      - name: Run contract, media, and server tests
+        run: npm test
+
+      - name: Audit production dependencies
+        run: npm audit --audit-level=moderate
+
+      - name: Reject whitespace errors
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            git diff --check "origin/${{ github.base_ref }}...HEAD"
+          else
+            git diff --check HEAD^ HEAD
+          fi

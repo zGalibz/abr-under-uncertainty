@@ -12,7 +12,16 @@
     "node": ">=22"
   },
   "scripts": {
-    "check:foundation": "node scripts/validate-foundation.mjs"
+    "check:foundation": "node scripts/validate-foundation.mjs",
+    "test:contracts": "node --test tests/contract/*.test.mjs",
+    "test:media": "npm test -w @abr-lab/media-cli",
+    "test:server": "npm test -w @abr-lab/shaper-server",
+    "test": "npm run test:contracts && npm run test:media && npm run test:server",
+    "media:package": "npm run package -w @abr-lab/media-cli --",
+    "media:validate": "npm run validate -w @abr-lab/media-cli --",
+    "scenarios:compile": "npm run scenarios:compile -w @abr-lab/shaper-server",
+    "server": "npm run serve -w @abr-lab/shaper-server",
+    "calibrate:scenarios": "npm run calibrate -w @abr-lab/shaper-server"
   },
   "devDependencies": {
     "ajv": "8.20.0",

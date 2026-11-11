@@ -1,8 +1,8 @@
 {
   "schemaVersion": "1.0.0",
   "id": "gradual-v1",
-  "description": "Draft stepped congestion trace. Final rates and reaction anchors must be compiled from the measured HLS ladder.",
-  "status": "draft",
+  "description": "Measured-ladder congestion steps followed by recovery.",
+  "status": "frozen",
   "clock": "server-monotonic-since-run-start",
   "rateUnit": "decimal-kbit-per-second",
   "responseStartDelayMs": 20,
@@ -14,11 +14,40 @@
     "maxChunkBytes": 4096
   },
   "phases": [
-    {"id": "high", "startMs": 0, "endMs": 20000, "downlinkKbps": 6000},
-    {"id": "upper-mid", "startMs": 20000, "endMs": 40000, "downlinkKbps": 3600},
-    {"id": "mid", "startMs": 40000, "endMs": 60000, "downlinkKbps": 2200},
-    {"id": "lower-mid", "startMs": 60000, "endMs": 80000, "downlinkKbps": 1200},
-    {"id": "low", "startMs": 80000, "endMs": 100000, "downlinkKbps": 700},
-    {"id": "recovery", "startMs": 100000, "downlinkKbps": 6000}
+    {
+      "id": "high",
+      "startMs": 0,
+      "endMs": 20000,
+      "downlinkKbps": 7045
+    },
+    {
+      "id": "v2-safe",
+      "startMs": 20000,
+      "endMs": 40000,
+      "downlinkKbps": 4408
+    },
+    {
+      "id": "v1-safe",
+      "startMs": 40000,
+      "endMs": 60000,
+      "downlinkKbps": 2409
+    },
+    {
+      "id": "v0-safe",
+      "startMs": 60000,
+      "endMs": 80000,
+      "downlinkKbps": 1292
+    },
+    {
+      "id": "severe",
+      "startMs": 80000,
+      "endMs": 100000,
+      "downlinkKbps": 711
+    },
+    {
+      "id": "recovery",
+      "startMs": 100000,
+      "downlinkKbps": 7045
+    }
   ]
 }

@@ -1,8 +1,8 @@
 {
   "schemaVersion": "1.0.0",
   "id": "volatile-v1",
-  "description": "Draft repeated high/low trace around rendition boundaries. Final rates and anchors must be compiled from the measured ladder.",
-  "status": "draft",
+  "description": "Repeated measured-ladder capacity oscillations and final recovery.",
+  "status": "frozen",
   "clock": "server-monotonic-since-run-start",
   "rateUnit": "decimal-kbit-per-second",
   "responseStartDelayMs": 20,
@@ -14,14 +14,58 @@
     "maxChunkBytes": 4096
   },
   "phases": [
-    {"id": "high-1", "startMs": 0, "endMs": 12000, "downlinkKbps": 6000},
-    {"id": "low-1", "startMs": 12000, "endMs": 24000, "downlinkKbps": 1200},
-    {"id": "upper-1", "startMs": 24000, "endMs": 36000, "downlinkKbps": 3600},
-    {"id": "severe-1", "startMs": 36000, "endMs": 48000, "downlinkKbps": 700},
-    {"id": "high-2", "startMs": 48000, "endMs": 60000, "downlinkKbps": 6000},
-    {"id": "low-2", "startMs": 60000, "endMs": 72000, "downlinkKbps": 1200},
-    {"id": "upper-2", "startMs": 72000, "endMs": 84000, "downlinkKbps": 3600},
-    {"id": "severe-2", "startMs": 84000, "endMs": 96000, "downlinkKbps": 700},
-    {"id": "recovery", "startMs": 96000, "downlinkKbps": 6000}
+    {
+      "id": "high-1",
+      "startMs": 0,
+      "endMs": 12000,
+      "downlinkKbps": 7045
+    },
+    {
+      "id": "v0-safe-1",
+      "startMs": 12000,
+      "endMs": 24000,
+      "downlinkKbps": 1292
+    },
+    {
+      "id": "v2-safe-1",
+      "startMs": 24000,
+      "endMs": 36000,
+      "downlinkKbps": 4408
+    },
+    {
+      "id": "severe-1",
+      "startMs": 36000,
+      "endMs": 48000,
+      "downlinkKbps": 711
+    },
+    {
+      "id": "high-2",
+      "startMs": 48000,
+      "endMs": 60000,
+      "downlinkKbps": 7045
+    },
+    {
+      "id": "v0-safe-2",
+      "startMs": 60000,
+      "endMs": 72000,
+      "downlinkKbps": 1292
+    },
+    {
+      "id": "v2-safe-2",
+      "startMs": 72000,
+      "endMs": 84000,
+      "downlinkKbps": 4408
+    },
+    {
+      "id": "severe-2",
+      "startMs": 84000,
+      "endMs": 96000,
+      "downlinkKbps": 711
+    },
+    {
+      "id": "recovery",
+      "startMs": 96000,
+      "downlinkKbps": 7045
+    }
   ]
 }
