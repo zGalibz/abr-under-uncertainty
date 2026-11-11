@@ -10,4 +10,4 @@ createServer((request, response) => {
   const pathname = new URL(request.url, `http://${request.headers.host}`).pathname; const relative = pathname === '/' ? 'index.html' : pathname.slice(1);
   const file = path.resolve(dist, relative); if (!file.startsWith(`${dist}${path.sep}`) || !existsSync(file)) { response.writeHead(404); response.end('Not found'); return; }
   response.writeHead(200, { 'content-type': types[path.extname(file)] || 'application/octet-stream', 'cache-control': 'no-store' }); createReadStream(file).pipe(response);
-}).listen(port, '127.0.0.1', () => console.log(`Player available at http://127.0.0.1:${port}`));
+}).listen(port, '0.0.0.0', () => console.log(`Player available at http://localhost:${port}`));
