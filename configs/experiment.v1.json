@@ -2,7 +2,7 @@
   "schemaVersion": "1.0.0",
   "id": "abr-under-uncertainty-v1",
   "packageManifest": "media/package.json",
-  "packageManifestSha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "packageManifestSha256": "a8c65b415d4729f84e1a17f6882623a47e2e3f1b0f24739c07224d7a96201158",
   "scenarioFiles": [
     "configs/scenarios/stable.v1.json",
     "configs/scenarios/gradual.v1.json",
@@ -10,7 +10,10 @@
   ],
   "player": {
     "hlsJsVersion": "1.7.4",
-    "policies": ["default-hlsjs", "conservative-throughput-v1"],
+    "policies": [
+      "default-hlsjs",
+      "conservative-throughput-v1"
+    ],
     "capLevelToPlayerSize": false,
     "sampleIntervalMs": 250,
     "conservativePolicyVersion": "1.0.0"
@@ -19,7 +22,10 @@
     "product": "chrome",
     "executablePath": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
     "headless": false,
-    "viewport": {"width": 1280, "height": 720},
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
     "deviceScaleFactor": 1,
     "cacheEnabled": false,
     "serviceWorkersBypassed": true

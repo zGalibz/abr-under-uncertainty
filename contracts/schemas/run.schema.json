@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://adaptive-hls.local/schemas/run.schema.json",
+  "title": "Persisted experiment run",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "runId", "requestId", "status", "experimentId", "experimentSha256", "scenarioId", "scenarioSha256", "packageSha256", "policyId", "repetition", "orderSeed", "clientLabel", "gitCommit", "gitDirty", "createdAt", "startedAt", "finishedAt", "finishReason", "failureCode", "warnings", "artifacts"],
+  "properties": {
+    "schemaVersion": {"const": "1.0.0"}, "runId": {"type": "string", "pattern": "^r_[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"},
+    "requestId": {"type": "string", "format": "uuid"}, "status": {"enum": ["CREATED", "RUNNING", "FINALIZING", "COMPLETED", "FAILED", "ABORTED"]},
+    "experimentId": {"type": "string"}, "experimentSha256": {"$ref": "#/$defs/sha256"}, "scenarioId": {"type": "string"},
+    "scenarioSha256": {"$ref": "#/$defs/sha256"}, "packageSha256": {"$ref": "#/$defs/sha256"},
+    "policyId": {"enum": ["default-hlsjs", "conservative-throughput-v1"]}, "repetition": {"type": "integer", "minimum": 1},
+    "orderSeed": {"type": "integer", "minimum": 0, "maximum": 4294967295}, "clientLabel": {"type": "string", "minLength": 1},
+    "gitCommit": {"type": "string", "pattern": "^[0-9a-f]{40}$"}, "gitDirty": {"type": "boolean"},
+    "createdAt": {"type": "string", "format": "date-time"}, "startedAt": {"type": ["string", "null"], "format": "date-time"},
+    "finishedAt": {"type": ["string", "null"], "format": "date-time"}, "finishReason": {"type": ["string", "null"]},
+    "failureCode": {"type": ["string", "null"]}, "warnings": {"type": "array", "items": {"type": "string"}},
+    "artifacts": {"type": "object", "additionalProperties": {"$ref": "#/$defs/sha256"}},
+    "startRequest": {"type": ["object", "null"]}, "serverRunStartEpochMs": {"type": ["number", "null"]}, "serverRunStartMonoMs": {"type": ["number", "null"]},
+    "createFingerprint": {"$ref": "#/$defs/sha256"}, "startFingerprint": {"$ref": "#/$defs/sha256"},
+    "finishFingerprint": {"$ref": "#/$defs/sha256"}, "abortFingerprint": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {"sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}
+}

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://adaptive-hls.local/schemas/scheduler-event.schema.json",
+  "type": "object", "additionalProperties": false,
+  "required": ["schemaVersion", "runId", "seq", "kind", "atRunMs", "requestSeq", "phaseId", "targetKbps", "bytes", "cumulativeRunBytes"],
+  "properties": {
+    "schemaVersion": {"const": "1.0.0"}, "runId": {"type": "string"}, "seq": {"type": "integer", "minimum": 0},
+    "kind": {"enum": ["write", "backpressure-start", "backpressure-end", "abort", "phase-crossed"]},
+    "atRunMs": {"type": "number", "minimum": 0}, "requestSeq": {"type": ["integer", "null"], "minimum": 0},
+    "phaseId": {"type": ["string", "null"]}, "targetKbps": {"type": ["integer", "null"], "minimum": 1},
+    "bytes": {"type": "integer", "minimum": 0}, "cumulativeRunBytes": {"type": "integer", "minimum": 0},
+    "tokensBefore": {"type": ["number", "null"], "minimum": 0}, "tokensAfter": {"type": ["number", "null"], "minimum": 0},
+    "writeAccepted": {"type": ["boolean", "null"]}, "plannedWakeAtRunMs": {"type": ["number", "null"], "minimum": 0}
+  }
+}
