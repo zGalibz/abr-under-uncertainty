@@ -1,0 +1,9 @@
+{
+  "case": "requested_level_never_played",
+  "why": "Player asks for 1080p (level_switching + a load that is never shown) but only 360p is ever played. Quality must follow what was played.",
+  "status": "valid",
+  "metrics": {
+    "tw_bitrate_kbps": 760,
+    "switch_count": 0
+  }
+}

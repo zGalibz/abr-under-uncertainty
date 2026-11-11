@@ -1,0 +1,13 @@
+{
+  "case": "fatal_error",
+  "why": "Fatal network error after 10.1 s of playback: incomplete, terminal reason fatal_error.",
+  "status": "valid",
+  "metrics": {
+    "completed": false,
+    "terminal_reason": "fatal_error",
+    "rebuffer_count": 0,
+    "prefix_only": true,
+    "tw_bitrate_prefix_kbps": 4700,
+    "played_media_s": 10
+  }
+}

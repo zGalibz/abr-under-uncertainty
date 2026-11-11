@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "fixture-stable",
+  "description": "Test-only scenario: constant high capacity, no reaction anchors.",
+  "status": "frozen",
+  "clock": "server-monotonic-since-run-start",
+  "rateUnit": "decimal-kbit-per-second",
+  "responseStartDelayMs": 20,
+  "scheduler": {"scope": "per-run-aggregate-media-body", "discipline": "work-conserving-fifo", "initialTokensBytes": 0, "maxBurstBytes": 16384, "maxChunkBytes": 4096},
+  "phases": [
+    {"id": "high", "startMs": 0, "downlinkKbps": 6000}
+  ]
+}

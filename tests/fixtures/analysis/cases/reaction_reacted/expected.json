@@ -1,0 +1,12 @@
+{
+  "case": "reaction_reacted",
+  "why": "Capacity drops at scenario 10 s (client 11000). Last request before is level 3; first level-0 request is fragment 7 at client 14000 → 3.0 s.",
+  "status": "valid",
+  "metrics": {
+    "reaction_anchor_n": 1,
+    "reaction_censored_n": 0,
+    "reaction_median_s": 3,
+    "reaction_worst_s": 3,
+    "down_switch_count": 1
+  }
+}

@@ -12,7 +12,11 @@
     "node": ">=22"
   },
   "scripts": {
-    "check:foundation": "node scripts/validate-foundation.mjs"
+    "check:foundation": "node scripts/validate-foundation.mjs",
+    "test:analysis": "node --test tests/contract/analysis-*.test.mjs",
+    "fixtures:analysis": "node tests/fixtures/analysis/build-fixtures.mjs",
+    "synthetic": "node packages/analysis/src/synthetic/simulate.mjs && node packages/analysis/src/analyze.mjs --raw results/synthetic/raw --out results/synthetic",
+    "analyze": "node packages/analysis/src/analyze.mjs --raw results/raw --out results"
   },
   "devDependencies": {
     "ajv": "8.20.0",

@@ -1,0 +1,11 @@
+{
+  "case": "reaction_already_safe",
+  "why": "Already at level 0 before the drop: reaction is 0 s and flagged proactive/already-safe.",
+  "status": "valid",
+  "metrics": {
+    "reaction_anchor_n": 1,
+    "reaction_median_s": 0,
+    "reaction_censored_n": 0
+  },
+  "anchorProactive": true
+}

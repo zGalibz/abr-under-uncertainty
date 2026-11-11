@@ -1,0 +1,6 @@
+{
+  "case": "invalid_user_pause",
+  "why": "Someone paused the video mid-run. Data is readable but the test conditions were broken: harness_invalid.",
+  "status": "harness_invalid",
+  "errorIncludes": "paused"
+}

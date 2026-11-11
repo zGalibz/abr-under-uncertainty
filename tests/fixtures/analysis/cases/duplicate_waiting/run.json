@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "1.0.0",
+  "synthetic": true,
+  "runId": "r_01a1be76-8205-7c39-a19b-7e3cba074e4c",
+  "experimentId": "fixture",
+  "policyId": "default-hlsjs",
+  "scenarioId": "fixture-stable",
+  "scenarioFile": "tests/fixtures/analysis/scenario.stable.json",
+  "repetition": 1,
+  "orderIndex": 1,
+  "clientMonoAtScenarioZeroMs": 1000
+}

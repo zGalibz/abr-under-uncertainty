@@ -1,0 +1,11 @@
+{
+  "case": "fragment_retry",
+  "why": "A non-fatal fragment error and a retried request must not change played quality or end the run.",
+  "status": "valid",
+  "metrics": {
+    "completed": true,
+    "tw_bitrate_kbps": 4700,
+    "switch_count": 0,
+    "rebuffer_count": 0
+  }
+}

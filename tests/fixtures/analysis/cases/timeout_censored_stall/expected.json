@@ -1,0 +1,16 @@
+{
+  "case": "timeout_censored_stall",
+  "why": "Stalls at 8.1 s and never recovers; runner times out 5 s later. Stall is kept but marked censored; bitrate is prefix-only.",
+  "status": "valid",
+  "metrics": {
+    "completed": false,
+    "terminal_reason": "timeout",
+    "rebuffer_count": 1,
+    "rebuffer_duration_s": 5,
+    "rebuffer_censored_n": 1,
+    "tw_bitrate_kbps": null,
+    "tw_bitrate_prefix_kbps": 4700,
+    "prefix_only": true,
+    "played_media_s": 8.1
+  }
+}

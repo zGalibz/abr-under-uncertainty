@@ -1,0 +1,12 @@
+{
+  "case": "one_stall",
+  "why": "One 1.5 s stall after 8.1 s of playback.",
+  "status": "valid",
+  "metrics": {
+    "rebuffer_count": 1,
+    "rebuffer_duration_s": 1.5,
+    "rebuffer_ratio": 0.06976744186046512,
+    "completed": true,
+    "tw_bitrate_kbps": 4700
+  }
+}

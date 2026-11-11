@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "1.0.0",
+  "synthetic": true,
+  "runId": "r_01a1be76-820c-719f-920b-a8b0e58ba8cf",
+  "experimentId": "fixture",
+  "policyId": "default-hlsjs",
+  "scenarioId": "fixture-drop",
+  "scenarioFile": "tests/fixtures/analysis/scenario.drop.json",
+  "repetition": 1,
+  "orderIndex": 1,
+  "clientMonoAtScenarioZeroMs": 1000
+}

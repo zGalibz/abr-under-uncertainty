@@ -2,5 +2,9 @@
   "name": "@abr-lab/analysis",
   "version": "0.0.0",
   "private": true,
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "vega": "6.4.0",
+    "vega-lite": "6.5.0"
+  }
 }
