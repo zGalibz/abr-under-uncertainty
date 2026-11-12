@@ -94,6 +94,17 @@ test('client.finished is the last event: nothing is recorded after a terminal st
   controller.destroy(); await client.close();
 });
 
+test('a request with no HTTP response is recorded with httpStatus null, never 0', async () => {
+  const video = new FakeVideo(); const { client, events } = makeTelemetry();
+  const controller = new PlayerController({ HlsClass: FakeHls, video, telemetry: client });
+  await controller.start({ manifestUrl: '/stream/v1/r_x/master.m3u8', policyId: DEFAULT_POLICY_ID });
+  // net::ERR_NETWORK_CHANGED and other aborted loads reach hls.js as code 0.
+  controller.hls.emit(FakeHls.Events.ERROR, { fatal: false, type: 'networkError', details: 'fragLoadError', response: { code: 0, text: '' } });
+  controller.hls.emit(FakeHls.Events.ERROR, { fatal: false, type: 'networkError', details: 'fragLoadError', response: { code: 503, text: 'Service Unavailable' } });
+  assert.deepEqual(events.filter((event) => event.type === 'hls.error').map((event) => event.data.httpStatus), [null, 503]);
+  controller.destroy(); await client.close();
+});
+
 test('a fatal HLS error emits a terminal event and finalizes exactly once', async () => {
   const video = new FakeVideo(); const { client, events } = makeTelemetry(); let terminals = 0;
   const controller = new PlayerController({ HlsClass: FakeHls, video, telemetry: client, onTerminal: async () => { terminals += 1; } });

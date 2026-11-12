@@ -391,7 +391,11 @@ export class PlayerController {
       fatal: Boolean(data.fatal),
       errorType: String(data.type || 'unknown'),
       details: String(data.details || 'unknown'),
-      httpStatus: Number.isInteger(status) ? status : null,
+      // A request that never got an HTTP response (aborted, network changed,
+      // connection refused) reports code 0. That is "no status", not an HTTP
+      // status: the schema allows 100-599 or null, and one invalid event makes
+      // the server reject the whole batch, so the run could never finalize.
+      httpStatus: Number.isInteger(status) && status >= 100 && status <= 599 ? status : null,
     });
 
     const stalled =
