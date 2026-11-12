@@ -79,7 +79,8 @@ function tradeoffSpec(cells) {
 }
 
 function reactionSpec(anchorRows) {
-  const data = anchorRows.filter((a) => a.status !== 'not_reached').map((a) => ({
+  const notExposed = anchorRows.filter((a) => a.status === 'not_exposed').length;
+  const data = anchorRows.filter((a) => a.status === 'ok' || a.status === 'censored').map((a) => ({
     anchor: a.anchor_id,
     policy: a.policy_id,
     // Censored anchors are drawn at the plateau length, the lower bound of the true value.
@@ -87,7 +88,7 @@ function reactionSpec(anchorRows) {
     status: a.censored ? 'censored (no reaction before plateau ended)' : a.proactive_or_already_safe ? 'already safe (0 s)' : 'reacted',
   }));
   return {
-    title: { text: 'Reaction time after capacity drops', subtitle: `each mark = one anchor in one run; n = ${data.length}` },
+    title: { text: 'Reaction time after capacity drops', subtitle: `each mark = one anchor in one run; n = ${data.length}${notExposed ? `; ${notExposed} anchor(s) not shown: no media request during the low plateau (not exposed)` : ''}` },
     width: 520,
     height: 260,
     data: { values: data },
@@ -102,12 +103,15 @@ function reactionSpec(anchorRows) {
   };
 }
 
-// Time series for one representative run: configured capacity vs played
-// bitrate on top, forward buffer below, stalls shaded in both.
+// Time series for one representative run: configured capacity, achieved
+// goodput and played bitrate on top, forward buffer below, stalls shaded in both.
 function timeseriesSpec(series) {
-  const { runId, policy, trace, capacity, played, buffer, stalls } = series;
+  const { runId, policy, trace, capacity, achieved = [], played, buffer, stalls } = series;
   const stallLayer = { data: { values: stalls }, mark: { type: 'rect', color: '#d62728', opacity: 0.2 }, encoding: { x: { field: 'start', type: 'quantitative' }, x2: { field: 'end' } } };
   const xTitle = { title: 'time since play request (s)' };
+  const achievedLayer = achieved.length
+    ? [{ data: { values: achieved }, mark: { type: 'rect', color: '#9e9e9e', opacity: 0.45 }, encoding: { x: { field: 't', type: 'quantitative' }, x2: { field: 't2' }, y: { field: 'kbps', type: 'quantitative' }, y2: { datum: 0 } } }]
+    : [];
   return {
     title: { text: `${trace} — ${policy}`, subtitle: `representative run ${runId} (median rebuffering in its cell); red = stalls` },
     vconcat: [
@@ -116,10 +120,11 @@ function timeseriesSpec(series) {
         height: 180,
         layer: [
           stallLayer,
+          ...achievedLayer,
           { data: { values: capacity }, mark: { type: 'line', interpolate: 'step-after', color: '#555', strokeDash: [4, 3] }, encoding: { x: { field: 't', type: 'quantitative', ...xTitle }, y: { field: 'kbps', type: 'quantitative', title: 'kbps' } } },
           { data: { values: played }, mark: { type: 'line', interpolate: 'step-after', color: POLICY_SCALE.range[POLICY_SCALE.domain.indexOf(policy)] ?? '#000', strokeWidth: 2 }, encoding: { x: { field: 't', type: 'quantitative' }, y: { field: 'kbps', type: 'quantitative' } } },
         ],
-        title: { text: 'configured capacity (dashed) vs played bitrate (solid)', fontSize: 11 },
+        title: { text: `configured capacity (dashed) · ${achieved.length ? 'achieved media goodput per second, server log (grey bars) · ' : ''}played bitrate (solid)`, fontSize: 11 },
       },
       {
         width: 560,

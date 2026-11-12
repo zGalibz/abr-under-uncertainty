@@ -222,6 +222,15 @@ export function mediaRequests(serverRequests) {
 // Reaction time per anchor (framework §4.6): time from the capacity drop to
 // the first media request at or below the new safe level that completed and
 // was buffered by the player.
+//
+// Statuses: ok (reacted, or 0 s when already safe), censored (requests were
+// made during the low plateau but none reached the safe level before it
+// ended), not_exposed (no media request at all during the plateau: the buffer
+// was full or the whole clip was already downloaded, so the policy never had
+// to choose a level under the new capacity), not_reached (run ended first).
+// Only ok and censored anchors are scored; framework §4.6 does not cover the
+// not_exposed case, which the dry runs showed is common (stock hls.js fetched
+// the whole 128 s clip within ~70 s on the volatile trace).
 function reduceReactions(events, anchors, run, serverRequests, terminalRunMs) {
   if (anchors.length === 0 || !serverRequests) return [];
   const requests = mediaRequests(serverRequests);
@@ -239,8 +248,12 @@ function reduceReactions(events, anchors, run, serverRequests, terminalRunMs) {
       results.push({ ...base, status: 'ok', level_pre: pre.level, reaction_s: 0, censored: false, proactive_or_already_safe: true });
       continue;
     }
-    const hit = requests.find((r) => r.atMs >= a.t_rel_ms && r.atMs < plateauEnd && r.level <= a.target_level
-      && r.complete && buffered.has(`${r.level}:${r.sn}`));
+    const during = requests.filter((r) => r.atMs >= a.t_rel_ms && r.atMs < plateauEnd);
+    if (during.length === 0) {
+      results.push({ ...base, status: 'not_exposed', level_pre: pre?.level ?? null, reaction_s: null, censored: false, proactive_or_already_safe: false });
+      continue;
+    }
+    const hit = during.find((r) => r.level <= a.target_level && r.complete && buffered.has(`${r.level}:${r.sn}`));
     results.push(hit
       ? { ...base, status: 'ok', level_pre: pre?.level ?? null, reaction_s: (hit.atMs - a.t_rel_ms) / 1000, censored: false, proactive_or_already_safe: false }
       : { ...base, status: 'censored', level_pre: pre?.level ?? null, reaction_s: null, censored: true, proactive_or_already_safe: false });
@@ -280,8 +293,8 @@ export function reduceRun({ run, events: unsorted, serverRequests }, ctx) {
   const buffer = started ? reduceBuffer(events, tFirst, tTerminal) : { mean: null, p05: null, lowFraction: null, coverage: null, gaps: 0 };
   const zero = clientMonoAtRunZero(run);
   const reactions = reduceReactions(events, anchors, run, serverRequests, zero === null ? Infinity : tTerminal - zero);
-  const reacted = reactions.filter((r) => r.status !== 'not_reached');
-  const reactionValues = reacted.filter((r) => !r.censored).map((r) => r.reaction_s);
+  const scored = reactions.filter((r) => r.status === 'ok' || r.status === 'censored');
+  const reactionValues = scored.filter((r) => !r.censored).map((r) => r.reaction_s);
 
   const metrics = {
     run_id: run.runId,
@@ -307,8 +320,9 @@ export function reduceRun({ run, events: unsorted, serverRequests }, ctx) {
     buffer_mean_s: buffer.mean,
     buffer_p05_s: buffer.p05,
     low_buffer_fraction: buffer.lowFraction,
-    reaction_anchor_n: anchors.length ? reacted.length : null,
-    reaction_censored_n: anchors.length ? reacted.filter((r) => r.censored).length : null,
+    reaction_anchor_n: anchors.length ? scored.length : null,
+    reaction_censored_n: anchors.length ? scored.filter((r) => r.censored).length : null,
+    reaction_not_exposed_n: anchors.length ? reactions.filter((r) => r.status === 'not_exposed').length : null,
     reaction_median_s: reactionValues.length ? median(reactionValues) : null,
     reaction_worst_s: reactionValues.length ? Math.max(...reactionValues) : null,
     played_media_s: playedSec,

@@ -124,6 +124,16 @@ export function validateHarness({ events, serverRequests }, reduced) {
   const warnings = [];
   const { tFirstPlayMs, tTerminalMs, sampleGaps } = reduced.detail;
   const during = (e) => tFirstPlayMs !== null && e.clientMonoMs > tFirstPlayMs && e.clientMonoMs < tTerminalMs;
+  // A tab that was already hidden when playback started is throttled for the
+  // whole run even if no change event follows during playback.
+  if (tFirstPlayMs !== null) {
+    let visibility = 'visible';
+    for (const e of [...events].sort((a, b) => a.seq - b.seq)) {
+      if (e.clientMonoMs > tFirstPlayMs) break;
+      if (e.type === 'client.visibility_changed') visibility = e.data.state;
+    }
+    if (visibility !== 'visible') problems.push(`tab was ${visibility} when playback started`);
+  }
   for (const e of events) {
     if (!during(e)) continue;
     if (e.type === 'media.pause' && e.data.reason !== 'ended') problems.push(`seq ${e.seq}: playback paused (${e.data.reason}) during the run`);

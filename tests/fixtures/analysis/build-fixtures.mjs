@@ -31,7 +31,7 @@ const Z = 1000;
 const SEG = 2;
 const CLIP_SEC = 20;
 
-function script({ seed, startupMs = 500, pieces, terminal = 'ended', levelForSn = () => 3, extra = [], dropSamples = null, startupDupWaitingAt = [] }) {
+function script({ seed, startupMs = 500, pieces, terminal = 'ended', levelForSn = () => 3, extra = [], dropSamples = null, startupDupWaitingAt = [], loadLeadMs = 1500 }) {
   const runId = fakeRunId(seed);
   const log = new EventLog(runId);
   const requests = [];
@@ -65,13 +65,14 @@ function script({ seed, startupMs = 500, pieces, terminal = 'ended', levelForSn 
     if (i < laid.length - 1) log.emit(p.end, 'media.playing', { readyState: 4, forwardBufferSec: 2 }, p.mediaStart);
   });
 
-  // Fragments: shown when the playhead crosses 2·sn; loaded 1.5 s earlier.
+  // Fragments: shown when the playhead crosses 2·sn; loaded loadLeadMs
+  // (default 1.5 s) earlier, but never before the run started.
   for (let sn = 0; sn < CLIP_SEC / SEG; sn += 1) {
     const p = laid.find((x) => x.play && x.mediaStart <= sn * SEG && sn * SEG < x.mediaStart + x.play / 1000);
     if (!p) continue;
     const shown = p.start + (sn * SEG - p.mediaStart) * 1000;
     const level = levelForSn(sn);
-    const loadAt = Math.max(Z + 10, shown - 1500);
+    const loadAt = Math.max(Z + 10, shown - loadLeadMs);
     log.emit(loadAt, 'hls.frag_loading', { level, sn, startSec: sn * SEG, durationSec: SEG, urlPath: urlPath(runId, level, sn) });
     log.emit(loadAt + 390, 'hls.frag_loaded', { level, sn, bytes: 500000, loadStartMs: loadAt, firstByteMs: loadAt + 30, loadEndMs: loadAt + 390 });
     log.emit(loadAt + 400, 'hls.frag_buffered', { level, sn, bytes: 500000, bandwidthEstimateBps: 6000000 });
@@ -260,6 +261,13 @@ const CASES = [
     expected: { status: 'valid', metrics: { reaction_anchor_n: 1, reaction_censored_n: 1, reaction_median_s: null } },
   },
   {
+    name: 'reaction_not_exposed',
+    scenario: DROP,
+    why: 'All ten fragments are requested at the start (as stock hls.js does on a fast link), so there is no media request at all during the 10-20 s low plateau. The policy never had to choose a level under the drop: not_exposed, which is neither a reaction nor a censored (slow) one, and is left out of reaction statistics.',
+    build: { seed: 21, pieces: fullPlay, levelForSn: () => 3, loadLeadMs: 20000 },
+    expected: { status: 'valid', metrics: { reaction_anchor_n: 0, reaction_censored_n: 0, reaction_not_exposed_n: 1, reaction_median_s: null, tw_bitrate_kbps: 4700 } },
+  },
+  {
     name: 'invalid_sequence_gap',
     why: 'Event seq 10 is missing (lost telemetry). The evidence cannot be trusted: rejected.',
     build: { seed: 15, pieces: fullPlay },
@@ -278,6 +286,12 @@ const CASES = [
       ],
     },
     expected: { status: 'harness_invalid', errorIncludes: 'paused' },
+  },
+  {
+    name: 'invalid_hidden_at_start',
+    why: 'The tab was already hidden before playback started and never became visible, so the browser throttled the whole run. There is no change event during playback, so it must be caught from the state at first play: harness_invalid.',
+    build: { seed: 20, pieces: fullPlay, extra: [[Z + 100, 'client.visibility_changed', { state: 'hidden' }]] },
+    expected: { status: 'harness_invalid', errorIncludes: 'hidden when playback started' },
   },
   {
     name: 'invalid_low_sample_coverage',

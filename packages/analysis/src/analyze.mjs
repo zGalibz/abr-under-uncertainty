@@ -10,6 +10,7 @@
 // Writes <out>/summary/*.csv, <out>/summary/validation_report.json and
 // <out>/figures/*.svg. Re-running on the same raw data gives the same output.
 
+import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { parseArgs } from 'node:util';
@@ -29,7 +30,7 @@ const RUN_COLUMNS = [
   'buffer_mean_s', 'buffer_p05_s', 'low_buffer_fraction', 'reaction_anchor_n', 'reaction_median_s', 'reaction_worst_s',
   'played_media_s', 'wall_session_s', 'start_skew_ms', 'sample_coverage', 'raw_sha256',
   // extra columns beyond the framework's required list
-  'validation_status', 'rebuffer_censored_n', 'reaction_censored_n', 'rerun_of',
+  'validation_status', 'rebuffer_censored_n', 'reaction_censored_n', 'reaction_not_exposed_n', 'rerun_of',
 ];
 const CELL_COLUMNS = ['policy_id', 'trace_id', 'metric', 'unit', 'n_valid', 'values_json', 'median', 'min', 'max', 'mean', 'sample_sd', 'n_complete'];
 const PAIRED_COLUMNS = ['trace_id', 'repeat_id', 'metric', 'default_value', 'conservative_value', 'delta_c_minus_d', 'improvement_signed'];
@@ -51,6 +52,28 @@ function pickRepresentative(cellRuns) {
   })[0];
 }
 
+// Achieved media goodput: bytes the server's shaper actually wrote for this
+// run (scheduler-writes.ndjson, scenario clock), in 1-second bins. It is a
+// measurement and is always drawn apart from the configured capacity, which is
+// only a target (framework §10.1). Seconds with no media writes (player idle
+// because its buffer was full) have no bar.
+function achievedGoodput(loaded, rel, end) {
+  const zero = clientMonoAtRunZero(loaded.run);
+  const file = path.join(loaded.dir, 'scheduler-writes.ndjson');
+  if (zero === null || !fs.existsSync(file)) return [];
+  const bins = new Map();
+  for (const line of fs.readFileSync(file, 'utf8').split('\n')) {
+    if (!line.trim()) continue;
+    const w = JSON.parse(line);
+    if (w.kind !== 'write' || !(w.bytes > 0)) continue;
+    const second = Math.floor(w.atRunMs / 1000);
+    bins.set(second, (bins.get(second) ?? 0) + w.bytes);
+  }
+  return [...bins].sort((a, b) => a[0] - b[0])
+    .map(([second, bytes]) => ({ t: rel(zero + second * 1000), t2: rel(zero + (second + 1) * 1000), kbps: (bytes * 8) / 1000 }))
+    .filter((b) => b.t >= 0 && b.t <= end);
+}
+
 function buildSeries(loaded, reduced, ctx) {
   const { run, events } = loaded;
   const { scenario } = ctx.scenarios.get(run.scenarioId);
@@ -69,6 +92,7 @@ function buildSeries(loaded, reduced, ctx) {
     policy: run.policyId,
     trace: run.scenarioId,
     capacity,
+    achieved: achievedGoodput(loaded, rel, end),
     played,
     buffer: events.filter((e) => e.type === 'media.sample').map((e) => ({ t: rel(e.clientMonoMs), s: e.data.forwardBufferSec })),
     stalls: reduced.detail.stalls.map((s) => ({ start: rel(s.startMs), end: rel(s.endMs) })),
@@ -97,9 +121,11 @@ function lineage(runs) {
   return prev;
 }
 
-// Warm-up and dry runs share results/raw with counted runs (the server has
-// one results root), so they are told apart by the runner's clientLabel.
-export const NOT_COUNTED_LABELS = ['runner-warmup', 'runner-dry-run'];
+// The server writes every run into results/raw (it has one results root):
+// counted runs, warm-ups, dry runs, demos and manual player-page runs. Only
+// runs whose clientLabel is on this allowlist are counted by default; any
+// other dataset (dry runs, synthetic data) must be selected with --labels.
+export const COUNTED_LABELS = ['runner-counted'];
 
 export async function analyze({ rawDir, outDir, contextFiles, orderFile, labels = null, charts = true, log = console.log }) {
   const ctx = loadContext(contextFiles);
@@ -107,11 +133,11 @@ export async function analyze({ rawDir, outDir, contextFiles, orderFile, labels 
   const runDirs = listRunDirs(rawDir);
   log(`Found ${runDirs.length} run(s) in ${path.relative(repoRoot, rawDir) || rawDir}`);
 
-  const keep = (run) => (labels ? labels.includes(run.clientLabel) : !NOT_COUNTED_LABELS.includes(run.clientLabel));
+  const keep = (run) => (labels ?? COUNTED_LABELS).includes(run.clientLabel);
   const allRuns = runDirs.map(loadRun);
   const loadedRuns = allRuns.filter((l) => keep(l.run));
   if (loadedRuns.length !== allRuns.length) {
-    log(`Skipping ${allRuns.length - loadedRuns.length} run(s) by label (${labels ? `keeping only ${labels.join(', ')}` : `not counted: ${NOT_COUNTED_LABELS.join(', ')}`})`);
+    log(`Skipping ${allRuns.length - loadedRuns.length} run(s) by label (${labels ? `keeping only ${labels.join(', ')}` : `counted labels: ${COUNTED_LABELS.join(', ')}`})`);
   }
   const rerunOf = lineage(loadedRuns.map((l) => l.run));
   const results = [];
