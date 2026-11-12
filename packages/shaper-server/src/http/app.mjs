@@ -117,7 +117,14 @@ export async function createExperimentServer({ packageRoot, resultsRoot, scenari
     const acceptedAtRunMs = acceptedMonoMs - run.serverRunStartMonoMs;
     const phaseAtAccept = scenarios.get(run.scenarioId).phases.find((phase) => acceptedAtRunMs >= phase.startMs && (phase.endMs === undefined || acceptedAtRunMs < phase.endMs))?.id ?? null;
     const abortController = new AbortController();
-    request.once('aborted', () => abortController.abort());
+    const abortTransfer = () => abortController.abort();
+    // The client may cancel while the asset is still being resolved and read,
+    // before this listener exists; 'aborted' then never fires again and the
+    // queued transfer would wait forever on a dead socket. Also watch the
+    // response's own 'close' and check whether the connection is already gone.
+    request.once('aborted', abortTransfer);
+    response.once('close', () => { if (!response.writableFinished) abortTransfer(); });
+    if (request.destroyed || response.destroyed || response.socket?.destroyed) abortTransfer();
     let result;
     try {
       result = await scheduler.enqueue({
@@ -126,7 +133,8 @@ export async function createExperimentServer({ packageRoot, resultsRoot, scenari
       });
       response.end();
     } catch (error) {
-      if (!response.headersSent) throw error;
+      // A client cancellation is logged as aborted even before headers were sent.
+      if (!response.headersSent && !abortController.signal.aborted) throw error;
       response.destroy();
       result = { bytesWritten: 0, firstByteAtRunMs: null, lastByteAtRunMs: clock.nowMonoMs() - run.serverRunStartMonoMs, aborted: true };
     } finally {
