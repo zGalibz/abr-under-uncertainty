@@ -1,0 +1,193 @@
+{
+  "experimentId": "abr-under-uncertainty-v1",
+  "synthetic": false,
+  "apparatus": {
+    "experimentSha256": "cef527eb5c5c8c8ef8ee9516ec779eee98fe883f696646250d5841881ff6d7ff",
+    "packageSha256": "a8c65b415d4729f84e1a17f6882623a47e2e3f1b0f24739c07224d7a96201158",
+    "files": {
+      "experiment": "configs/experiment.v1.json",
+      "scenarioManifest": "configs/scenarios/manifest.json",
+      "packageManifest": "media/package.json"
+    }
+  },
+  "counts": {
+    "runs": 2,
+    "valid": 2,
+    "harnessInvalid": 0,
+    "rejected": 0
+  },
+  "matrix": {
+    "expected": 18,
+    "validCount": 2,
+    "errors": [
+      "missing valid run: default-hlsjs / stable-v1 / repeat 1",
+      "missing valid run: default-hlsjs / stable-v1 / repeat 2",
+      "missing valid run: default-hlsjs / stable-v1 / repeat 3",
+      "missing valid run: default-hlsjs / gradual-v1 / repeat 1",
+      "missing valid run: default-hlsjs / gradual-v1 / repeat 2",
+      "missing valid run: default-hlsjs / gradual-v1 / repeat 3",
+      "missing valid run: default-hlsjs / volatile-v1 / repeat 2",
+      "missing valid run: default-hlsjs / volatile-v1 / repeat 3",
+      "missing valid run: conservative-throughput-v1 / stable-v1 / repeat 1",
+      "missing valid run: conservative-throughput-v1 / stable-v1 / repeat 2",
+      "missing valid run: conservative-throughput-v1 / stable-v1 / repeat 3",
+      "missing valid run: conservative-throughput-v1 / gradual-v1 / repeat 1",
+      "missing valid run: conservative-throughput-v1 / gradual-v1 / repeat 2",
+      "missing valid run: conservative-throughput-v1 / gradual-v1 / repeat 3",
+      "missing valid run: conservative-throughput-v1 / volatile-v1 / repeat 2",
+      "missing valid run: conservative-throughput-v1 / volatile-v1 / repeat 3"
+    ],
+    "cells": [
+      {
+        "policy": "default-hlsjs",
+        "trace": "stable-v1",
+        "repetition": 1,
+        "valid": 0,
+        "attempts": 0
+      },
+      {
+        "policy": "default-hlsjs",
+        "trace": "stable-v1",
+        "repetition": 2,
+        "valid": 0,
+        "attempts": 0
+      },
+      {
+        "policy": "default-hlsjs",
+        "trace": "stable-v1",
+        "repetition": 3,
+        "valid": 0,
+        "attempts": 0
+      },
+      {
+        "policy": "default-hlsjs",
+        "trace": "gradual-v1",
+        "repetition": 1,
+        "valid": 0,
+        "attempts": 0
+      },
+      {
+        "policy": "default-hlsjs",
+        "trace": "gradual-v1",
+        "repetition": 2,
+        "valid": 0,
+        "attempts": 0
+      },
+      {
+        "policy": "default-hlsjs",
+        "trace": "gradual-v1",
+        "repetition": 3,
+        "valid": 0,
+        "attempts": 0
+      },
+      {
+        "policy": "default-hlsjs",
+        "trace": "volatile-v1",
+        "repetition": 1,
+        "valid": 1,
+        "attempts": 1
+      },
+      {
+        "policy": "default-hlsjs",
+        "trace": "volatile-v1",
+        "repetition": 2,
+        "valid": 0,
+        "attempts": 0
+      },
+      {
+        "policy": "default-hlsjs",
+        "trace": "volatile-v1",
+        "repetition": 3,
+        "valid": 0,
+        "attempts": 0
+      },
+      {
+        "policy": "conservative-throughput-v1",
+        "trace": "stable-v1",
+        "repetition": 1,
+        "valid": 0,
+        "attempts": 0
+      },
+      {
+        "policy": "conservative-throughput-v1",
+        "trace": "stable-v1",
+        "repetition": 2,
+        "valid": 0,
+        "attempts": 0
+      },
+      {
+        "policy": "conservative-throughput-v1",
+        "trace": "stable-v1",
+        "repetition": 3,
+        "valid": 0,
+        "attempts": 0
+      },
+      {
+        "policy": "conservative-throughput-v1",
+        "trace": "gradual-v1",
+        "repetition": 1,
+        "valid": 0,
+        "attempts": 0
+      },
+      {
+        "policy": "conservative-throughput-v1",
+        "trace": "gradual-v1",
+        "repetition": 2,
+        "valid": 0,
+        "attempts": 0
+      },
+      {
+        "policy": "conservative-throughput-v1",
+        "trace": "gradual-v1",
+        "repetition": 3,
+        "valid": 0,
+        "attempts": 0
+      },
+      {
+        "policy": "conservative-throughput-v1",
+        "trace": "volatile-v1",
+        "repetition": 1,
+        "valid": 1,
+        "attempts": 1
+      },
+      {
+        "policy": "conservative-throughput-v1",
+        "trace": "volatile-v1",
+        "repetition": 2,
+        "valid": 0,
+        "attempts": 0
+      },
+      {
+        "policy": "conservative-throughput-v1",
+        "trace": "volatile-v1",
+        "repetition": 3,
+        "valid": 0,
+        "attempts": 0
+      }
+    ]
+  },
+  "runs": [
+    {
+      "runId": "r_01a1ce8f-15bc-755c-b964-ef393845c0a0",
+      "dir": "results/dry-run/raw/r_01a1ce8f-15bc-755c-b964-ef393845c0a0",
+      "policyId": "default-hlsjs",
+      "scenarioId": "volatile-v1",
+      "repetition": 1,
+      "rerunOf": null,
+      "status": "valid",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "runId": "r_01a1ce91-1768-78c2-acc6-daee91d86d21",
+      "dir": "results/dry-run/raw/r_01a1ce91-1768-78c2-acc6-daee91d86d21",
+      "policyId": "conservative-throughput-v1",
+      "scenarioId": "volatile-v1",
+      "repetition": 1,
+      "rerunOf": null,
+      "status": "valid",
+      "errors": [],
+      "warnings": []
+    }
+  ]
+}

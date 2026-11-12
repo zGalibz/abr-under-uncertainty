@@ -1,0 +1,3 @@
+policy_id,trace_id,completed,terminal_reasons
+conservative-throughput-v1,volatile-v1,1/1,ended:1
+default-hlsjs,volatile-v1,1/1,ended:1

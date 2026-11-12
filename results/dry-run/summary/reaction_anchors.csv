@@ -1,0 +1,9 @@
+run_id,policy_id,trace_id,repeat_id,anchor_id,t_rel_ms,plateau_end_ms,capacity_before_bps,capacity_after_bps,safe_level_before,safe_level_after,target_level,level_pre,status,reaction_s,censored,proactive_or_already_safe
+r_01a1ce8f-15bc-755c-b964-ef393845c0a0,default-hlsjs,volatile-v1,1,v0-safe-1-anchor,12000,24000,7045000,1292000,3,0,0,3,censored,NA,1,0
+r_01a1ce8f-15bc-755c-b964-ef393845c0a0,default-hlsjs,volatile-v1,1,severe-1-anchor,36000,48000,4408000,711000,2,-1,0,2,ok,11.124502,0,0
+r_01a1ce8f-15bc-755c-b964-ef393845c0a0,default-hlsjs,volatile-v1,1,v0-safe-2-anchor,60000,72000,7045000,1292000,3,0,0,3,censored,NA,1,0
+r_01a1ce8f-15bc-755c-b964-ef393845c0a0,default-hlsjs,volatile-v1,1,severe-2-anchor,84000,96000,4408000,711000,2,-1,0,1,not_exposed,NA,0,0
+r_01a1ce91-1768-78c2-acc6-daee91d86d21,conservative-throughput-v1,volatile-v1,1,v0-safe-1-anchor,12000,24000,7045000,1292000,3,0,0,3,censored,NA,1,0
+r_01a1ce91-1768-78c2-acc6-daee91d86d21,conservative-throughput-v1,volatile-v1,1,severe-1-anchor,36000,48000,4408000,711000,2,-1,0,2,censored,NA,1,0
+r_01a1ce91-1768-78c2-acc6-daee91d86d21,conservative-throughput-v1,volatile-v1,1,v0-safe-2-anchor,60000,72000,7045000,1292000,3,0,0,3,censored,NA,1,0
+r_01a1ce91-1768-78c2-acc6-daee91d86d21,conservative-throughput-v1,volatile-v1,1,severe-2-anchor,84000,96000,4408000,711000,2,-1,0,2,not_exposed,NA,0,0
