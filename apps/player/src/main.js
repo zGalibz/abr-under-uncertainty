@@ -227,6 +227,10 @@ async function startAutomatedRun(params) {
   }
 
   setRun({ ...run, status: started.status });
+  // The runner URL does not carry the trace; show the one the server started.
+  if ([...form.elements.scenario.options].some((option) => option.value === started.scenarioId)) {
+    form.elements.scenario.value = started.scenarioId;
+  }
   createTelemetry(run, api);
 
   controller = new PlayerController({
