@@ -1,0 +1,713 @@
+{
+  "schemaVersion": "1.0.0",
+  "experimentId": "abr-under-uncertainty-v1",
+  "datasetVersion": "v1",
+  "labels": [
+    "runner-counted"
+  ],
+  "apparatus": {
+    "experimentSha256": "cef527eb5c5c8c8ef8ee9516ec779eee98fe883f696646250d5841881ff6d7ff",
+    "packageSha256": "a8c65b415d4729f84e1a17f6882623a47e2e3f1b0f24739c07224d7a96201158",
+    "scenarios": {
+      "stable-v1": "bcf57c79fc092bcd54830e28fb6f84dfa1b5b310403a5e07e78dfb3145359447",
+      "gradual-v1": "1a58551387803cc48b8c7d848d9735374d2c210dc64bc8895fb8de887284e41c",
+      "volatile-v1": "b0096b6f6825532106a946390c56b46388d3b270dceb99054d0e9a5eed430a50"
+    }
+  },
+  "runOrder": {
+    "path": "results/run-order.json",
+    "sha256": "628908f23e202d7e6aa0f46068ebdf242d38ab8da4f7b91ee6915b2908eb7e12"
+  },
+  "runnerLedger": {
+    "path": "results/runner-ledger.ndjson",
+    "sha256": "c055e9aea94d9ec7d19a42e66cf8dc1f07c01f2429977a8d4b4030306302ab63"
+  },
+  "counts": {
+    "runs": 19,
+    "valid": 18,
+    "harnessInvalid": 1,
+    "rejected": 0,
+    "files": 77,
+    "bytes": 444908259
+  },
+  "matrix": {
+    "expected": 18,
+    "validCount": 18,
+    "complete": true,
+    "errors": []
+  },
+  "runs": [
+    {
+      "runId": "r_01a1ce99-3265-7b48-8c56-b6af8a5d24ba",
+      "policyId": "conservative-throughput-v1",
+      "scenarioId": "volatile-v1",
+      "repetition": 3,
+      "clientLabel": "runner-counted",
+      "createdAt": "2026-11-12T07:11:48.837Z",
+      "serverStatus": "COMPLETED",
+      "gitCommit": "082cff04eac42a9c4ac1b987c5cf48ef519a2394",
+      "gitDirty": false,
+      "validation": "valid",
+      "errors": [],
+      "files": [
+        {
+          "name": "console.log",
+          "bytes": 112,
+          "sha256": "122972b246762d37d4686fbd3e32d85314cb63a277e0b2f120ed7e86a7c3ec19"
+        },
+        {
+          "name": "events.ndjson",
+          "bytes": 306671,
+          "sha256": "5696f936bd866d10c217cf02f6da82c36592ab3d5af1e8e8529bab53f1bf3bb7"
+        },
+        {
+          "name": "run.json",
+          "bytes": 1661,
+          "sha256": "66e19b7ed879840ddad1d035e93f289588feb233776289c3a294232b32e8aa9b"
+        },
+        {
+          "name": "scheduler-writes.ndjson",
+          "bytes": 21181524,
+          "sha256": "11c88a5128eed4bb144c93fecad4b7ce71b56feb34be1d8bf5850d54d6d7b5c6"
+        },
+        {
+          "name": "server-requests.ndjson",
+          "bytes": 29411,
+          "sha256": "f36f78fe74c6c8023a3805d019f56a5f529bda8536187b566c97ca3be49b6fd3"
+        }
+      ]
+    },
+    {
+      "runId": "r_01a1ce9b-2fbb-7d97-855b-042cb8ad33c2",
+      "policyId": "default-hlsjs",
+      "scenarioId": "stable-v1",
+      "repetition": 2,
+      "clientLabel": "runner-counted",
+      "createdAt": "2026-11-12T07:13:59.227Z",
+      "serverStatus": "COMPLETED",
+      "gitCommit": "082cff04eac42a9c4ac1b987c5cf48ef519a2394",
+      "gitDirty": false,
+      "validation": "valid",
+      "errors": [],
+      "files": [
+        {
+          "name": "events.ndjson",
+          "bytes": 266093,
+          "sha256": "fd3b0d381356d423d69819dd7a213c7b9eb205d1ca7da7e68d74c8372abfbf4c"
+        },
+        {
+          "name": "run.json",
+          "bytes": 1649,
+          "sha256": "30eba54eca9b5b225b558e2c3b4ee7635e9738f66c178532580369a1712a7647"
+        },
+        {
+          "name": "scheduler-writes.ndjson",
+          "bytes": 17365933,
+          "sha256": "87b98c28965ab1be25f05f9a16e5e01cb1dafa2ee0fae4d6025ce002cdd66fb4"
+        },
+        {
+          "name": "server-requests.ndjson",
+          "bytes": 28670,
+          "sha256": "5db98ae6d66212be1c3a99173e2c271eb9248e84e21a1f1ebdccd388d32eb39a"
+        }
+      ]
+    },
+    {
+      "runId": "r_01a1ce9d-2ff1-73e8-abaf-cea092cc036a",
+      "policyId": "default-hlsjs",
+      "scenarioId": "gradual-v1",
+      "repetition": 3,
+      "clientLabel": "runner-counted",
+      "createdAt": "2026-11-12T07:16:10.355Z",
+      "serverStatus": "COMPLETED",
+      "gitCommit": "082cff04eac42a9c4ac1b987c5cf48ef519a2394",
+      "gitDirty": false,
+      "validation": "valid",
+      "errors": [],
+      "files": [
+        {
+          "name": "events.ndjson",
+          "bytes": 267581,
+          "sha256": "cbb546271eddb1563dd9abecc5eee68d3e3747ad08b981ca3e0257da2c01d1c9"
+        },
+        {
+          "name": "run.json",
+          "bytes": 1663,
+          "sha256": "1366d77c4ee92141c1448658a64a72ee4360c3af4af4a7221df8759b2dd140f3"
+        },
+        {
+          "name": "scheduler-writes.ndjson",
+          "bytes": 30445166,
+          "sha256": "f4e8f52c1ee0745bcbf1106493eb85ee56410d4fde8f545ea00917cfdb418d89"
+        },
+        {
+          "name": "server-requests.ndjson",
+          "bytes": 28809,
+          "sha256": "e9a2ddf4c06676f2ed6143d39a5b1998ba53b5c4a36a497cd2597b4539bf69ff"
+        }
+      ]
+    },
+    {
+      "runId": "r_01a1ce9f-2fb4-734d-9d46-4ef6ec04a079",
+      "policyId": "default-hlsjs",
+      "scenarioId": "volatile-v1",
+      "repetition": 3,
+      "clientLabel": "runner-counted",
+      "createdAt": "2026-11-12T07:18:21.364Z",
+      "serverStatus": "COMPLETED",
+      "gitCommit": "082cff04eac42a9c4ac1b987c5cf48ef519a2394",
+      "gitDirty": false,
+      "validation": "valid",
+      "errors": [],
+      "files": [
+        {
+          "name": "events.ndjson",
+          "bytes": 272454,
+          "sha256": "68411f3c25421d030e89ee3006afc61aa5daacea08414aeef64cd7429b161c3b"
+        },
+        {
+          "name": "run.json",
+          "bytes": 1663,
+          "sha256": "7c470449a3fe4aae48e96f0042d6a6222c5d9e82a242c13b1e72c9cc7b10a6b2"
+        },
+        {
+          "name": "scheduler-writes.ndjson",
+          "bytes": 23240294,
+          "sha256": "3899d0f60d93329e459bef3219b09b3b8c9c26c01cedca6607708d2a54d6d056"
+        },
+        {
+          "name": "server-requests.ndjson",
+          "bytes": 29326,
+          "sha256": "7e9ee809771dd4781c0427bab5b4373cf8941bfb2b2d41094d406e9cd2ee294e"
+        }
+      ]
+    },
+    {
+      "runId": "r_01a1cea1-2f91-700c-ba79-e4cdd3ed3b57",
+      "policyId": "default-hlsjs",
+      "scenarioId": "volatile-v1",
+      "repetition": 2,
+      "clientLabel": "runner-counted",
+      "createdAt": "2026-11-12T07:20:32.402Z",
+      "serverStatus": "COMPLETED",
+      "gitCommit": "082cff04eac42a9c4ac1b987c5cf48ef519a2394",
+      "gitDirty": false,
+      "validation": "valid",
+      "errors": [],
+      "files": [
+        {
+          "name": "events.ndjson",
+          "bytes": 274568,
+          "sha256": "0d8271c6939ef54cb5bacd937be1ebf070f8bfaf745980e3e0e690cfc585af51"
+        },
+        {
+          "name": "run.json",
+          "bytes": 1651,
+          "sha256": "429e02065627720bab69e9b81f7e5604cd98718d5b5d186baaef0fc525a51d3b"
+        },
+        {
+          "name": "scheduler-writes.ndjson",
+          "bytes": 23049983,
+          "sha256": "8ae653364a95529fee946393c9923de7adbfc75a3fa8088f1104438e311ab0e2"
+        },
+        {
+          "name": "server-requests.ndjson",
+          "bytes": 29417,
+          "sha256": "e9a00381fabce65d0603a277851c37b7b2253ebffae52507d47b16bdb3cf9e52"
+        }
+      ]
+    },
+    {
+      "runId": "r_01a1cea3-2fc2-7220-93a6-b9e758feb9c4",
+      "policyId": "conservative-throughput-v1",
+      "scenarioId": "volatile-v1",
+      "repetition": 1,
+      "clientLabel": "runner-counted",
+      "createdAt": "2026-11-12T07:22:43.522Z",
+      "serverStatus": "COMPLETED",
+      "gitCommit": "082cff04eac42a9c4ac1b987c5cf48ef519a2394",
+      "gitDirty": false,
+      "validation": "valid",
+      "errors": [],
+      "files": [
+        {
+          "name": "events.ndjson",
+          "bytes": 306946,
+          "sha256": "7d1d349095b443c072d7e178b204a19bcf34f74a3cb90bb91b84ca854b6e19a0"
+        },
+        {
+          "name": "run.json",
+          "bytes": 1677,
+          "sha256": "9002920b84137019a4817af707db4408880494ab4df412816becd3182f60611f"
+        },
+        {
+          "name": "scheduler-writes.ndjson",
+          "bytes": 20755097,
+          "sha256": "b79d3e7518b76e9b069a16fb35688259576b2b9f8b6eeb5ae3e0fc06dfe29bfb"
+        },
+        {
+          "name": "server-requests.ndjson",
+          "bytes": 30214,
+          "sha256": "1df45f2d2328a2595e9b7b0555794123938c86c79f43c97ad973efaf8b96fd73"
+        }
+      ]
+    },
+    {
+      "runId": "r_01a1cea5-2b9d-771c-8884-d30ce7ec5976",
+      "policyId": "default-hlsjs",
+      "scenarioId": "stable-v1",
+      "repetition": 3,
+      "clientLabel": "runner-counted",
+      "createdAt": "2026-11-12T07:24:53.533Z",
+      "serverStatus": "COMPLETED",
+      "gitCommit": "082cff04eac42a9c4ac1b987c5cf48ef519a2394",
+      "gitDirty": false,
+      "validation": "valid",
+      "errors": [],
+      "files": [
+        {
+          "name": "events.ndjson",
+          "bytes": 265025,
+          "sha256": "c2afc2fa6b77cb8c48576604765090b9d7de8cf91e2be6172e4fe00485f42863"
+        },
+        {
+          "name": "run.json",
+          "bytes": 1662,
+          "sha256": "5d155b777717f8959d45b37ed0a6f0f13642b015be2119251524ff58fda7f78e"
+        },
+        {
+          "name": "scheduler-writes.ndjson",
+          "bytes": 19299612,
+          "sha256": "75a3ba8fee5d4538c19bdd917a65ad0857a81001d515c38bba2e5ccd55da54ae"
+        },
+        {
+          "name": "server-requests.ndjson",
+          "bytes": 28863,
+          "sha256": "889b3c5ffe799c85485a2c953e2fb31f8a0b8e328d4afdf6c4ebf19435756d35"
+        }
+      ]
+    },
+    {
+      "runId": "r_01a1cea7-2b47-78bb-8d26-9dcc30c52b2d",
+      "policyId": "default-hlsjs",
+      "scenarioId": "gradual-v1",
+      "repetition": 1,
+      "clientLabel": "runner-counted",
+      "createdAt": "2026-11-12T07:27:04.526Z",
+      "serverStatus": "ABORTED",
+      "gitCommit": "082cff04eac42a9c4ac1b987c5cf48ef519a2394",
+      "gitDirty": false,
+      "validation": "harness_invalid",
+      "errors": [
+        "server marked run ABORTED (runner watchdog: no terminal state after 270000 ms)"
+      ],
+      "files": [
+        {
+          "name": "console.log",
+          "bytes": 95737,
+          "sha256": "811ac9321b2edecc3a5fdd2050d78b303aeea9eba4997d06c9dea5fcff994572"
+        },
+        {
+          "name": "run.json",
+          "bytes": 1417,
+          "sha256": "a229e131cfdc54d214a8f0574bb666fd54b8c17edefadead9db64ba0fe70e7f0"
+        },
+        {
+          "name": "scheduler-writes.ndjson",
+          "bytes": 16415183,
+          "sha256": "4cd1ea631346e8e3d5d9a9c61e06babef4e1cd78597e6d9011ff92f219d76ebd"
+        },
+        {
+          "name": "server-requests.ndjson",
+          "bytes": 28953,
+          "sha256": "960852bef39796789652c014079779e994e6d01c5fbcb808dab3a8dd0377aee2"
+        }
+      ]
+    },
+    {
+      "runId": "r_01a1ceab-4f29-7ef2-a63d-3c3bccc92645",
+      "policyId": "default-hlsjs",
+      "scenarioId": "gradual-v1",
+      "repetition": 1,
+      "clientLabel": "runner-counted",
+      "createdAt": "2026-11-12T07:31:35.849Z",
+      "serverStatus": "COMPLETED",
+      "gitCommit": "082cff04eac42a9c4ac1b987c5cf48ef519a2394",
+      "gitDirty": false,
+      "validation": "valid",
+      "errors": [],
+      "files": [
+        {
+          "name": "events.ndjson",
+          "bytes": 266484,
+          "sha256": "bb973f966a9088a3b2c6703ded89ba026f647967809b1407616931a6fdaaabbe"
+        },
+        {
+          "name": "run.json",
+          "bytes": 1651,
+          "sha256": "d8b0e48fbf45925e9a89f593b2d0973169847eef00df31f1ffedd5383c7af9fa"
+        },
+        {
+          "name": "scheduler-writes.ndjson",
+          "bytes": 36463386,
+          "sha256": "10c4b939ffce1fabdd452c667678eba48582c007ec4872002e8094370f6257a0"
+        },
+        {
+          "name": "server-requests.ndjson",
+          "bytes": 28938,
+          "sha256": "251044efa80c1ddd3380491edbcea190cb548d2af565f494ba9814e2ca3e496f"
+        }
+      ]
+    },
+    {
+      "runId": "r_01a1cead-4dc8-774a-b5ce-d78be0059fcd",
+      "policyId": "conservative-throughput-v1",
+      "scenarioId": "volatile-v1",
+      "repetition": 2,
+      "clientLabel": "runner-counted",
+      "createdAt": "2026-11-12T07:33:46.568Z",
+      "serverStatus": "COMPLETED",
+      "gitCommit": "082cff04eac42a9c4ac1b987c5cf48ef519a2394",
+      "gitDirty": false,
+      "validation": "valid",
+      "errors": [],
+      "files": [
+        {
+          "name": "events.ndjson",
+          "bytes": 305511,
+          "sha256": "290c9c71855fbb683a3e1d11ba039e0efe0000de23d497cb2d3dfa4e13aadbaa"
+        },
+        {
+          "name": "run.json",
+          "bytes": 1677,
+          "sha256": "619de3711f5795ac569c7bc36293d5abbd7fb212b9f3682be6ce4f1bba61a773"
+        },
+        {
+          "name": "scheduler-writes.ndjson",
+          "bytes": 22779752,
+          "sha256": "66bede832f6f50a0786d912f542fee06b4aeedae994967229fa20baa7da66f59"
+        },
+        {
+          "name": "server-requests.ndjson",
+          "bytes": 29791,
+          "sha256": "1f79d98929b7f5b49787abc4396012de8b5e210b8462769068f6f5e83bd9f2ff"
+        }
+      ]
+    },
+    {
+      "runId": "r_01a1ceaf-486a-7c60-a2bd-ce0334b39e88",
+      "policyId": "default-hlsjs",
+      "scenarioId": "volatile-v1",
+      "repetition": 1,
+      "clientLabel": "runner-counted",
+      "createdAt": "2026-11-12T07:35:56.266Z",
+      "serverStatus": "COMPLETED",
+      "gitCommit": "082cff04eac42a9c4ac1b987c5cf48ef519a2394",
+      "gitDirty": false,
+      "validation": "valid",
+      "errors": [],
+      "files": [
+        {
+          "name": "events.ndjson",
+          "bytes": 274183,
+          "sha256": "f9c51f9933220d83a927d24070a555ca291c54defac1fc48b98ee9ad48d7c509"
+        },
+        {
+          "name": "run.json",
+          "bytes": 1665,
+          "sha256": "c50e5034255a3ed0725bdbbf921337873384472e72c0bc750460b8d609223c69"
+        },
+        {
+          "name": "scheduler-writes.ndjson",
+          "bytes": 28321308,
+          "sha256": "6dcc5894207a1ca7eeea1b5135fe01238d5167f911d5cbb25517192ab0c450e8"
+        },
+        {
+          "name": "server-requests.ndjson",
+          "bytes": 29911,
+          "sha256": "56fe974206752d90f8fc48657b215101626404970bee5b9185f46dfd7d6eed21"
+        }
+      ]
+    },
+    {
+      "runId": "r_01a1ceb1-4700-77d3-86ac-00e7925f5844",
+      "policyId": "default-hlsjs",
+      "scenarioId": "gradual-v1",
+      "repetition": 2,
+      "clientLabel": "runner-counted",
+      "createdAt": "2026-11-12T07:38:06.976Z",
+      "serverStatus": "COMPLETED",
+      "gitCommit": "082cff04eac42a9c4ac1b987c5cf48ef519a2394",
+      "gitDirty": false,
+      "validation": "valid",
+      "errors": [],
+      "files": [
+        {
+          "name": "events.ndjson",
+          "bytes": 267109,
+          "sha256": "929e1a2193921dead686fce595dfdc7c9c8e68b1774a3614ece0c13575929872"
+        },
+        {
+          "name": "run.json",
+          "bytes": 1664,
+          "sha256": "f38305babe50d87fcbd582e3e25470b0b3d3c5a25adaacdc22ee7f39ce09cc2c"
+        },
+        {
+          "name": "scheduler-writes.ndjson",
+          "bytes": 34379393,
+          "sha256": "227de194e0155cb471fcfa49c2b2097661bf2ed4b4f6f7bdbeda001b9575d4a7"
+        },
+        {
+          "name": "server-requests.ndjson",
+          "bytes": 28910,
+          "sha256": "3bebf5b2196600af8f92c87d2cf761e3c1b5855236357840ab274847d8b339e1"
+        }
+      ]
+    },
+    {
+      "runId": "r_01a1ceb3-45c9-7715-b20a-947c3ed70a02",
+      "policyId": "default-hlsjs",
+      "scenarioId": "stable-v1",
+      "repetition": 1,
+      "clientLabel": "runner-counted",
+      "createdAt": "2026-11-12T07:40:17.737Z",
+      "serverStatus": "COMPLETED",
+      "gitCommit": "082cff04eac42a9c4ac1b987c5cf48ef519a2394",
+      "gitDirty": false,
+      "validation": "valid",
+      "errors": [],
+      "files": [
+        {
+          "name": "events.ndjson",
+          "bytes": 265335,
+          "sha256": "34b133bd781b767dc886beb8e6cc0b0b8a6aed3dd14dcadbe3e751f0ea4dd676"
+        },
+        {
+          "name": "run.json",
+          "bytes": 1663,
+          "sha256": "9f4fe5242cf1490374b41f700b642b12a0f9b3ee5742ebd7f45a261b7b7729c6"
+        },
+        {
+          "name": "scheduler-writes.ndjson",
+          "bytes": 23415584,
+          "sha256": "cd509552474779b2d5b089153c502ef717bc7e5e3da45a599ccd35c751e78587"
+        },
+        {
+          "name": "server-requests.ndjson",
+          "bytes": 28835,
+          "sha256": "0ef52f74280bbc1b387136aeee9ecf42a01fef7fd81530f079c597a6c573dbcb"
+        }
+      ]
+    },
+    {
+      "runId": "r_01a1ceb5-447c-7fb2-9774-15d061276387",
+      "policyId": "conservative-throughput-v1",
+      "scenarioId": "gradual-v1",
+      "repetition": 1,
+      "clientLabel": "runner-counted",
+      "createdAt": "2026-11-12T07:42:28.476Z",
+      "serverStatus": "COMPLETED",
+      "gitCommit": "082cff04eac42a9c4ac1b987c5cf48ef519a2394",
+      "gitDirty": false,
+      "validation": "valid",
+      "errors": [],
+      "files": [
+        {
+          "name": "events.ndjson",
+          "bytes": 301744,
+          "sha256": "10bc71339c51efb765687c6768836d554dd6d7938c0943476bf66034a748b053"
+        },
+        {
+          "name": "run.json",
+          "bytes": 1677,
+          "sha256": "318482012d0ff55cd40d7c728ef56a06d2cc2477b30cc1fd75acef42f34794d8"
+        },
+        {
+          "name": "scheduler-writes.ndjson",
+          "bytes": 20931456,
+          "sha256": "a739de6c217b4812c5451fe58239c2b46a3aa39f5e8fd2a855d385d5a38ffcb8"
+        },
+        {
+          "name": "server-requests.ndjson",
+          "bytes": 29733,
+          "sha256": "fe04c3aac207ec42f71da6fbeb77e57531b27be8d6d406c15e4491a76fbcb192"
+        }
+      ]
+    },
+    {
+      "runId": "r_01a1ceb7-3f67-7b99-b48a-c5bbae22fc58",
+      "policyId": "conservative-throughput-v1",
+      "scenarioId": "stable-v1",
+      "repetition": 3,
+      "clientLabel": "runner-counted",
+      "createdAt": "2026-11-12T07:44:38.247Z",
+      "serverStatus": "COMPLETED",
+      "gitCommit": "082cff04eac42a9c4ac1b987c5cf48ef519a2394",
+      "gitDirty": false,
+      "validation": "valid",
+      "errors": [],
+      "files": [
+        {
+          "name": "events.ndjson",
+          "bytes": 298462,
+          "sha256": "6c26a6f3cc0a7e0a05b965b3b7830422a3f0bfb047de516928748e2cba36d3b8"
+        },
+        {
+          "name": "run.json",
+          "bytes": 1676,
+          "sha256": "289f8573552540375f6b28c1c2971dc9aab5a17b17fac3deeb9e55af80875db4"
+        },
+        {
+          "name": "scheduler-writes.ndjson",
+          "bytes": 17428605,
+          "sha256": "1a568897b9d6a6871c1a3240e9e0ff061313765dfc153f55ebc6168106a6bc29"
+        },
+        {
+          "name": "server-requests.ndjson",
+          "bytes": 29665,
+          "sha256": "030d0e8deae30b8dcd25052c8ac23dd9e9090b102b69155eb5146fa011ee80b3"
+        }
+      ]
+    },
+    {
+      "runId": "r_01a1ceb9-3a52-70f6-a59c-70c41630e62f",
+      "policyId": "conservative-throughput-v1",
+      "scenarioId": "stable-v1",
+      "repetition": 2,
+      "clientLabel": "runner-counted",
+      "createdAt": "2026-11-12T07:46:48.019Z",
+      "serverStatus": "COMPLETED",
+      "gitCommit": "082cff04eac42a9c4ac1b987c5cf48ef519a2394",
+      "gitDirty": false,
+      "validation": "valid",
+      "errors": [],
+      "files": [
+        {
+          "name": "events.ndjson",
+          "bytes": 297996,
+          "sha256": "1811786b81ca0e52b145e84dee725d802d2bdc008589b6f852fe1ed09e05bf4c"
+        },
+        {
+          "name": "run.json",
+          "bytes": 1661,
+          "sha256": "2566a31604dc49f9f4710ea4463fcc0ebbe55f823670c7d2336e771caf9a92ff"
+        },
+        {
+          "name": "scheduler-writes.ndjson",
+          "bytes": 20754359,
+          "sha256": "1feafd89eef1bdedf9a7e3e1043ee7e30cf10b4fb79fa7fac0f98d7cdef665fc"
+        },
+        {
+          "name": "server-requests.ndjson",
+          "bytes": 29657,
+          "sha256": "ec95b4d96b0b60d1ea254b3f03de82d321fec207d30a3a1937bb4fc178535cef"
+        }
+      ]
+    },
+    {
+      "runId": "r_01a1cebb-3524-7a40-8d07-93b80d94d9ec",
+      "policyId": "conservative-throughput-v1",
+      "scenarioId": "gradual-v1",
+      "repetition": 3,
+      "clientLabel": "runner-counted",
+      "createdAt": "2026-11-12T07:48:57.764Z",
+      "serverStatus": "COMPLETED",
+      "gitCommit": "082cff04eac42a9c4ac1b987c5cf48ef519a2394",
+      "gitDirty": false,
+      "validation": "valid",
+      "errors": [],
+      "files": [
+        {
+          "name": "events.ndjson",
+          "bytes": 299915,
+          "sha256": "f81ac0cfa72389b2b427edb392a9b7dfc8a569a009b0e4cc2902779dd6bc9bb5"
+        },
+        {
+          "name": "run.json",
+          "bytes": 1677,
+          "sha256": "19019073260ca62358656360ca320894f382aaf25c560991e25555b3f782107e"
+        },
+        {
+          "name": "scheduler-writes.ndjson",
+          "bytes": 20812197,
+          "sha256": "88e15ff11a7c222d0996dc7bf56fd64b53f3ebdfeee21c761a5089ee8e5cb2ac"
+        },
+        {
+          "name": "server-requests.ndjson",
+          "bytes": 29760,
+          "sha256": "76723191139257f495ea67419cc834a8f73db309e429076fc4b28d21ec2d57ae"
+        }
+      ]
+    },
+    {
+      "runId": "r_01a1cebd-2fcc-79a9-adb7-872f84023758",
+      "policyId": "conservative-throughput-v1",
+      "scenarioId": "stable-v1",
+      "repetition": 1,
+      "clientLabel": "runner-counted",
+      "createdAt": "2026-11-12T07:51:07.468Z",
+      "serverStatus": "COMPLETED",
+      "gitCommit": "082cff04eac42a9c4ac1b987c5cf48ef519a2394",
+      "gitDirty": false,
+      "validation": "valid",
+      "errors": [],
+      "files": [
+        {
+          "name": "events.ndjson",
+          "bytes": 298773,
+          "sha256": "f95b58b28c23f8bc19be274982196b66feb75a4c7ec4b5090074f8f9c8031eaa"
+        },
+        {
+          "name": "run.json",
+          "bytes": 1676,
+          "sha256": "c4fc786209a2949e0dadba85df0feb03d4414fc5e9d808d18595065f4d51e44b"
+        },
+        {
+          "name": "scheduler-writes.ndjson",
+          "bytes": 20329077,
+          "sha256": "cc683ad7c639b927d5ed3ea49d0133d911c0b03cb99382957444475b1f49aa40"
+        },
+        {
+          "name": "server-requests.ndjson",
+          "bytes": 29642,
+          "sha256": "f17e748061b026c9b16a6a4f286251633da7acc7547658f2f859dde8148d6708"
+        }
+      ]
+    },
+    {
+      "runId": "r_01a1cebf-2a5a-7187-ae36-c97a173ccd83",
+      "policyId": "conservative-throughput-v1",
+      "scenarioId": "gradual-v1",
+      "repetition": 2,
+      "clientLabel": "runner-counted",
+      "createdAt": "2026-11-12T07:53:17.147Z",
+      "serverStatus": "COMPLETED",
+      "gitCommit": "082cff04eac42a9c4ac1b987c5cf48ef519a2394",
+      "gitDirty": false,
+      "validation": "valid",
+      "errors": [],
+      "files": [
+        {
+          "name": "events.ndjson",
+          "bytes": 300043,
+          "sha256": "37ede0a52962b52935942a27637fa1d629a591cfead50042b4597a72f3f8a246"
+        },
+        {
+          "name": "run.json",
+          "bytes": 1677,
+          "sha256": "26d8f50ebce961b019cec2a751211ea411ea9e00c7ebaaaa99f39152cb6cc06f"
+        },
+        {
+          "name": "scheduler-writes.ndjson",
+          "bytes": 21719928,
+          "sha256": "cb4f21e2a906edcbdc12a381a071351b95374aecf6b7ac03b934615171e096ed"
+        },
+        {
+          "name": "server-requests.ndjson",
+          "bytes": 29768,
+          "sha256": "8c0328467e622490c64f4bb40e6acbaad27381e4958e02fdf69eec5cc16c4bde"
+        }
+      ]
+    }
+  ]
+}

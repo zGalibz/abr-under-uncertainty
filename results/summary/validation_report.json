@@ -1,0 +1,365 @@
+{
+  "experimentId": "abr-under-uncertainty-v1",
+  "synthetic": false,
+  "apparatus": {
+    "experimentSha256": "cef527eb5c5c8c8ef8ee9516ec779eee98fe883f696646250d5841881ff6d7ff",
+    "packageSha256": "a8c65b415d4729f84e1a17f6882623a47e2e3f1b0f24739c07224d7a96201158",
+    "files": {
+      "experiment": "configs/experiment.v1.json",
+      "scenarioManifest": "configs/scenarios/manifest.json",
+      "packageManifest": "media/package.json"
+    }
+  },
+  "counts": {
+    "runs": 19,
+    "valid": 18,
+    "harnessInvalid": 1,
+    "rejected": 0
+  },
+  "matrix": {
+    "expected": 18,
+    "validCount": 18,
+    "errors": [],
+    "cells": [
+      {
+        "policy": "default-hlsjs",
+        "trace": "stable-v1",
+        "repetition": 1,
+        "valid": 1,
+        "attempts": 1
+      },
+      {
+        "policy": "default-hlsjs",
+        "trace": "stable-v1",
+        "repetition": 2,
+        "valid": 1,
+        "attempts": 1
+      },
+      {
+        "policy": "default-hlsjs",
+        "trace": "stable-v1",
+        "repetition": 3,
+        "valid": 1,
+        "attempts": 1
+      },
+      {
+        "policy": "default-hlsjs",
+        "trace": "gradual-v1",
+        "repetition": 1,
+        "valid": 1,
+        "attempts": 2
+      },
+      {
+        "policy": "default-hlsjs",
+        "trace": "gradual-v1",
+        "repetition": 2,
+        "valid": 1,
+        "attempts": 1
+      },
+      {
+        "policy": "default-hlsjs",
+        "trace": "gradual-v1",
+        "repetition": 3,
+        "valid": 1,
+        "attempts": 1
+      },
+      {
+        "policy": "default-hlsjs",
+        "trace": "volatile-v1",
+        "repetition": 1,
+        "valid": 1,
+        "attempts": 1
+      },
+      {
+        "policy": "default-hlsjs",
+        "trace": "volatile-v1",
+        "repetition": 2,
+        "valid": 1,
+        "attempts": 1
+      },
+      {
+        "policy": "default-hlsjs",
+        "trace": "volatile-v1",
+        "repetition": 3,
+        "valid": 1,
+        "attempts": 1
+      },
+      {
+        "policy": "conservative-throughput-v1",
+        "trace": "stable-v1",
+        "repetition": 1,
+        "valid": 1,
+        "attempts": 1
+      },
+      {
+        "policy": "conservative-throughput-v1",
+        "trace": "stable-v1",
+        "repetition": 2,
+        "valid": 1,
+        "attempts": 1
+      },
+      {
+        "policy": "conservative-throughput-v1",
+        "trace": "stable-v1",
+        "repetition": 3,
+        "valid": 1,
+        "attempts": 1
+      },
+      {
+        "policy": "conservative-throughput-v1",
+        "trace": "gradual-v1",
+        "repetition": 1,
+        "valid": 1,
+        "attempts": 1
+      },
+      {
+        "policy": "conservative-throughput-v1",
+        "trace": "gradual-v1",
+        "repetition": 2,
+        "valid": 1,
+        "attempts": 1
+      },
+      {
+        "policy": "conservative-throughput-v1",
+        "trace": "gradual-v1",
+        "repetition": 3,
+        "valid": 1,
+        "attempts": 1
+      },
+      {
+        "policy": "conservative-throughput-v1",
+        "trace": "volatile-v1",
+        "repetition": 1,
+        "valid": 1,
+        "attempts": 1
+      },
+      {
+        "policy": "conservative-throughput-v1",
+        "trace": "volatile-v1",
+        "repetition": 2,
+        "valid": 1,
+        "attempts": 1
+      },
+      {
+        "policy": "conservative-throughput-v1",
+        "trace": "volatile-v1",
+        "repetition": 3,
+        "valid": 1,
+        "attempts": 1
+      }
+    ]
+  },
+  "runs": [
+    {
+      "runId": "r_01a1ce99-3265-7b48-8c56-b6af8a5d24ba",
+      "dir": "results/raw/r_01a1ce99-3265-7b48-8c56-b6af8a5d24ba",
+      "policyId": "conservative-throughput-v1",
+      "scenarioId": "volatile-v1",
+      "repetition": 3,
+      "rerunOf": null,
+      "status": "valid",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "runId": "r_01a1ce9b-2fbb-7d97-855b-042cb8ad33c2",
+      "dir": "results/raw/r_01a1ce9b-2fbb-7d97-855b-042cb8ad33c2",
+      "policyId": "default-hlsjs",
+      "scenarioId": "stable-v1",
+      "repetition": 2,
+      "rerunOf": null,
+      "status": "valid",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "runId": "r_01a1ce9d-2ff1-73e8-abaf-cea092cc036a",
+      "dir": "results/raw/r_01a1ce9d-2ff1-73e8-abaf-cea092cc036a",
+      "policyId": "default-hlsjs",
+      "scenarioId": "gradual-v1",
+      "repetition": 3,
+      "rerunOf": null,
+      "status": "valid",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "runId": "r_01a1ce9f-2fb4-734d-9d46-4ef6ec04a079",
+      "dir": "results/raw/r_01a1ce9f-2fb4-734d-9d46-4ef6ec04a079",
+      "policyId": "default-hlsjs",
+      "scenarioId": "volatile-v1",
+      "repetition": 3,
+      "rerunOf": null,
+      "status": "valid",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "runId": "r_01a1cea1-2f91-700c-ba79-e4cdd3ed3b57",
+      "dir": "results/raw/r_01a1cea1-2f91-700c-ba79-e4cdd3ed3b57",
+      "policyId": "default-hlsjs",
+      "scenarioId": "volatile-v1",
+      "repetition": 2,
+      "rerunOf": null,
+      "status": "valid",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "runId": "r_01a1cea3-2fc2-7220-93a6-b9e758feb9c4",
+      "dir": "results/raw/r_01a1cea3-2fc2-7220-93a6-b9e758feb9c4",
+      "policyId": "conservative-throughput-v1",
+      "scenarioId": "volatile-v1",
+      "repetition": 1,
+      "rerunOf": null,
+      "status": "valid",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "runId": "r_01a1cea5-2b9d-771c-8884-d30ce7ec5976",
+      "dir": "results/raw/r_01a1cea5-2b9d-771c-8884-d30ce7ec5976",
+      "policyId": "default-hlsjs",
+      "scenarioId": "stable-v1",
+      "repetition": 3,
+      "rerunOf": null,
+      "status": "valid",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "runId": "r_01a1cea7-2b47-78bb-8d26-9dcc30c52b2d",
+      "dir": "results/raw/r_01a1cea7-2b47-78bb-8d26-9dcc30c52b2d",
+      "policyId": "default-hlsjs",
+      "scenarioId": "gradual-v1",
+      "repetition": 1,
+      "rerunOf": null,
+      "status": "harness_invalid",
+      "errors": [
+        "server marked run ABORTED (runner watchdog: no terminal state after 270000 ms)"
+      ],
+      "warnings": []
+    },
+    {
+      "runId": "r_01a1ceab-4f29-7ef2-a63d-3c3bccc92645",
+      "dir": "results/raw/r_01a1ceab-4f29-7ef2-a63d-3c3bccc92645",
+      "policyId": "default-hlsjs",
+      "scenarioId": "gradual-v1",
+      "repetition": 1,
+      "rerunOf": "r_01a1cea7-2b47-78bb-8d26-9dcc30c52b2d",
+      "status": "valid",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "runId": "r_01a1cead-4dc8-774a-b5ce-d78be0059fcd",
+      "dir": "results/raw/r_01a1cead-4dc8-774a-b5ce-d78be0059fcd",
+      "policyId": "conservative-throughput-v1",
+      "scenarioId": "volatile-v1",
+      "repetition": 2,
+      "rerunOf": null,
+      "status": "valid",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "runId": "r_01a1ceaf-486a-7c60-a2bd-ce0334b39e88",
+      "dir": "results/raw/r_01a1ceaf-486a-7c60-a2bd-ce0334b39e88",
+      "policyId": "default-hlsjs",
+      "scenarioId": "volatile-v1",
+      "repetition": 1,
+      "rerunOf": null,
+      "status": "valid",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "runId": "r_01a1ceb1-4700-77d3-86ac-00e7925f5844",
+      "dir": "results/raw/r_01a1ceb1-4700-77d3-86ac-00e7925f5844",
+      "policyId": "default-hlsjs",
+      "scenarioId": "gradual-v1",
+      "repetition": 2,
+      "rerunOf": null,
+      "status": "valid",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "runId": "r_01a1ceb3-45c9-7715-b20a-947c3ed70a02",
+      "dir": "results/raw/r_01a1ceb3-45c9-7715-b20a-947c3ed70a02",
+      "policyId": "default-hlsjs",
+      "scenarioId": "stable-v1",
+      "repetition": 1,
+      "rerunOf": null,
+      "status": "valid",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "runId": "r_01a1ceb5-447c-7fb2-9774-15d061276387",
+      "dir": "results/raw/r_01a1ceb5-447c-7fb2-9774-15d061276387",
+      "policyId": "conservative-throughput-v1",
+      "scenarioId": "gradual-v1",
+      "repetition": 1,
+      "rerunOf": null,
+      "status": "valid",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "runId": "r_01a1ceb7-3f67-7b99-b48a-c5bbae22fc58",
+      "dir": "results/raw/r_01a1ceb7-3f67-7b99-b48a-c5bbae22fc58",
+      "policyId": "conservative-throughput-v1",
+      "scenarioId": "stable-v1",
+      "repetition": 3,
+      "rerunOf": null,
+      "status": "valid",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "runId": "r_01a1ceb9-3a52-70f6-a59c-70c41630e62f",
+      "dir": "results/raw/r_01a1ceb9-3a52-70f6-a59c-70c41630e62f",
+      "policyId": "conservative-throughput-v1",
+      "scenarioId": "stable-v1",
+      "repetition": 2,
+      "rerunOf": null,
+      "status": "valid",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "runId": "r_01a1cebb-3524-7a40-8d07-93b80d94d9ec",
+      "dir": "results/raw/r_01a1cebb-3524-7a40-8d07-93b80d94d9ec",
+      "policyId": "conservative-throughput-v1",
+      "scenarioId": "gradual-v1",
+      "repetition": 3,
+      "rerunOf": null,
+      "status": "valid",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "runId": "r_01a1cebd-2fcc-79a9-adb7-872f84023758",
+      "dir": "results/raw/r_01a1cebd-2fcc-79a9-adb7-872f84023758",
+      "policyId": "conservative-throughput-v1",
+      "scenarioId": "stable-v1",
+      "repetition": 1,
+      "rerunOf": null,
+      "status": "valid",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "runId": "r_01a1cebf-2a5a-7187-ae36-c97a173ccd83",
+      "dir": "results/raw/r_01a1cebf-2a5a-7187-ae36-c97a173ccd83",
+      "policyId": "conservative-throughput-v1",
+      "scenarioId": "gradual-v1",
+      "repetition": 2,
+      "rerunOf": null,
+      "status": "valid",
+      "errors": [],
+      "warnings": []
+    }
+  ]
+}

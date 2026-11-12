@@ -1,0 +1,7 @@
+policy_id,trace_id,completed,terminal_reasons
+conservative-throughput-v1,gradual-v1,3/3,ended:3
+conservative-throughput-v1,stable-v1,3/3,ended:3
+conservative-throughput-v1,volatile-v1,3/3,ended:3
+default-hlsjs,gradual-v1,3/3,ended:3
+default-hlsjs,stable-v1,3/3,ended:3
+default-hlsjs,volatile-v1,3/3,ended:3
