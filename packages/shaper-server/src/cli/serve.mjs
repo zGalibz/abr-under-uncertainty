@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 import { createExperimentServer } from '../http/app.mjs';
+import { parseAllowedOrigins } from '../http/cors.mjs';
 import { sha256Canonical } from '../domain/canonical-json.mjs';
 
 const root = process.env.INIT_CWD || process.cwd();
@@ -18,6 +19,7 @@ const packageSha256 = createHash('sha256').update(packageBytes).digest('hex');
 if (packageSha256 !== experimentConfig.packageManifestSha256) throw new Error('experiment package hash does not match media/package.json');
 const service = await createExperimentServer({
   packageRoot: path.join(root, 'media'), resultsRoot: path.join(root, 'results/raw'), scenarios,
+  allowedOrigins: parseAllowedOrigins(process.env.CORS_ALLOWED_ORIGINS || ''),
   experiment: { id: experimentConfig.id, sha256: sha256Canonical(experimentConfig), packageSha256 },
 });
 const address = await service.listen({ host: process.env.HOST || '127.0.0.1', port: Number(process.env.PORT || 8080) });

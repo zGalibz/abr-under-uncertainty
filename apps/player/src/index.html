@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ABR Under Uncertainty Player</title><link rel="stylesheet" href="styles.css"></head>
+  <body>
+    <main>
+      <header><h1>ABR Under Uncertainty</h1><p>Browser HLS player for controlled adaptive-streaming runs.</p></header>
+      <section class="controls" aria-label="Run controls">
+        <form id="run-form">
+          <label>Policy <select name="policy"><option value="default-hlsjs">default-hlsjs</option><option value="conservative-throughput-v1">conservative-throughput-v1</option></select></label>
+          <label>Scenario <select name="scenario"><option value="stable-v1">stable-v1</option><option value="gradual-v1">gradual-v1</option><option value="volatile-v1">volatile-v1</option></select></label>
+          <label>Connection <select name="source"><option value="server">Experiment server</option><option value="mock">MOCK dashboard preview</option></select></label>
+          <label>Server URL <input name="server" value="" placeholder="same origin"></label>
+          <button type="submit">Start run</button><button id="reset" type="button">Reset</button>
+        </form>
+        <p id="status" data-tone="neutral">Ready. A real run does not request media until the server has started it.</p>
+        <p>Run: <output data-run-id>No run</output></p>
+      </section>
+      <section class="player"><video id="video" controls playsinline></video></section>
+      <section id="dashboard" class="dashboard" aria-label="Live telemetry dashboard">
+        <h2>Live telemetry</h2>
+        <dl><div><dt>State</dt><dd data-value="state">IDLE</dd></div><div><dt>Requested</dt><dd data-value="requested">—</dd></div><div><dt>Effective</dt><dd data-value="effective">—</dd></div><div><dt>Buffer</dt><dd data-value="buffer">—</dd></div><div><dt>hls.js estimate</dt><dd data-value="hls-throughput">—</dd></div><div><dt>Policy estimate</dt><dd data-value="policy-throughput">—</dd></div><div><dt>Decision</dt><dd data-value="decision">—</dd></div><div><dt>Stalls</dt><dd data-value="stalls">—</dd></div><div><dt>Configuration</dt><dd data-value="config">—</dd></div></dl>
+        <h3>Recorded events</h3><ol data-events></ol>
+      </section>
+    </main>
+    <script src="hls.min.js"></script><script type="module" src="main.js"></script>
+  </body>
+</html>
