@@ -71,6 +71,9 @@ The system is local-first so the live demonstration does not depend on public Wi
 7. [`docs/MEMBER1_IMPLEMENTATION.md`](docs/MEMBER1_IMPLEMENTATION.md) — completed media/networking design, measurements, commands, validation, and rationale.
 8. [`docs/MEMBER1_HANDOFF.md`](docs/MEMBER1_HANDOFF.md) — concise player/runner integration instructions.
 9. [`docs/MEMBER1_VERIFICATION.md`](docs/MEMBER1_VERIFICATION.md) — exact verification environment, hashes, commands, and observed gate results.
+10. [`docs/experiment-protocol.md`](docs/experiment-protocol.md) — the pre-registered protocol for the counted runs: variables, procedure, inclusion rules, metric definitions, reporting rules.
+11. [`docs/results.md`](docs/results.md) — results of dataset v1, hypotheses, pre-registered targets, limitations.
+12. [`slides/README.md`](slides/README.md) — presentation running order, speakers, live demo and fallback.
 
 ## Repository layout
 
@@ -121,19 +124,32 @@ See [`docs/GITHUB_WORKFLOW.md`](docs/GITHUB_WORKFLOW.md) for the full procedure.
 | `v0.5-data-freeze` | Exactly 18 valid core outcomes and immutable evidence manifest accepted |
 | `v1.0-presentation` | Final charts, claims, slides, live demo, fallback recording, and timed rehearsal ready |
 
-## Current status
+## Current status (2026-11-12)
 
-Member 1 implementation complete and awaiting team review:
+| Milestone | State |
+|---|---|
+| Media + network (Member 1) | done: validated four-level package, frozen traces, calibrated shaper (PR #2) |
+| Player + both policies (Member 2) | done (PR #3), plus a runner-controlled mode for counted runs |
+| Runner, validator, metrics, charts (Member 3) | done; real end-to-end dry runs valid and reproducible |
+| Counted dataset v1 | **18/18 valid**, frozen in `results/data-freeze.json`; awaiting all three approvals (`v0.5-data-freeze`) |
+| Results and presentation | `docs/results.md`, `slides/README.md`; awaiting rehearsal and approval (`v1.0-presentation`) |
 
-- the four-rendition aligned HLS package is generated and validated;
-- source, package, segment, playlist, and scenario hashes are frozen;
-- measured peak/average rates replace the placeholder package hash;
-- the lifecycle API, telemetry ingestion, secure HLS server, and aggregate bandwidth shaper are implemented;
-- stable, gradual, and volatile scenarios are frozen from measured ladder thresholds;
-- physical loopback calibration passes every plateau and transition gate;
-- contract, media, server, security, concurrency, and calibration tests are automated in CI;
-- player, ABR-policy, runner, analysis, counted experiment, and presentation work remain pending;
-- no ABR comparison result or presentation conclusion exists yet.
+**Result in one sentence:** in our lab neither policy stalled in any of the 18 runs, so the conservative policy had nothing to prevent. It played a 3–15 % lower bitrate in every paired run, in exchange for starting about 1 s sooner and keeping about 2 s more minimum buffer (`docs/results.md`).
+
+## Run the experiment end to end
+
+```bash
+npm ci && npm test                                                  # 96 tests: contracts, media, server, runner, player
+CORS_ALLOWED_ORIGINS=http://127.0.0.1:4173 npm run server           # terminal 1: API + shaped media on :8080
+npm run build -w @abr-lab/player && npm run dev -w @abr-lab/player  # terminal 2: player page on :4173
+export CHROME_PATH=~/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome
+npm run runner -- --mode dry-run --player-url http://127.0.0.1:4173/   # one real run per policy
+npm run runner -- --mode counted --player-url http://127.0.0.1:4173/   # the frozen 18-run order (clean checkout)
+npm run analyze -- --order results/run-order.json                      # validate, reduce, summarise, chart
+npm run freeze                                                          # data-freeze manifest (--verify to check)
+```
+
+The media package (`media/`) and source clip are not in git; see `docs/MEMBER1_HANDOFF.md`. The protocol that governs counted runs is `docs/experiment-protocol.md`.
 
 ## Sources
 
