@@ -1,4 +1,5 @@
 
+import { readAutomationParams } from './automation.js';
 import { LiveDashboard } from './dashboard.js';
 import { BUILD_METADATA } from './build-metadata.js';
 import { MockRunApi } from './mocks/mock-run-api.js';
@@ -18,6 +19,7 @@ let telemetry = null;
 let api = null;
 let previewTimer = null;
 let activeRun = null;
+let wallTimer = null;
 
 // Generate a unique UUID for every run creation request.
 function requestId() {
@@ -194,6 +196,67 @@ async function startRealRun() {
   );
 }
 
+// Runner-controlled run: the runner already created the run, so this page
+// only starts, plays and finishes it. No user interaction is needed or allowed.
+async function startAutomatedRun(params) {
+  for (const element of form.elements) element.disabled = true;
+  form.elements.policy.value = params.policyId;
+  video.controls = false;
+  video.muted = true;
+
+  api = new HttpRunApi({ baseUrl: params.apiBase });
+  const run = { runId: params.runId, status: 'CREATED' };
+  activeRun = run;
+  setRun(run);
+  setStatus(`Runner-controlled run (${params.policyId}): starting…`);
+
+  let started;
+
+  try {
+    started = await api.startRun(run.runId, {
+      clientSendEpochMs: Date.now(),
+      clientSendMonoMs: performance.now(),
+    });
+  } catch (error) {
+    // Let the server end the run now instead of waiting for the runner's watchdog.
+    await api.abortRun(run.runId, {
+      reason: `player could not start the run: ${error.message}`.slice(0, 500),
+    }).catch(() => {});
+    activeRun = null;
+    throw error;
+  }
+
+  setRun({ ...run, status: started.status });
+  createTelemetry(run, api);
+
+  controller = new PlayerController({
+    HlsClass: window.Hls,
+    video,
+    telemetry,
+    onState: (state) => dashboard.render(state),
+    onTerminal: ({ reason, summary }) => {
+      clearTimeout(wallTimer);
+      return finalizeRun(run, reason, summary);
+    },
+  });
+
+  wallTimer = setTimeout(() => {
+    void controller.complete('timeout');
+  }, params.maxWallMs);
+
+  try {
+    await controller.start({
+      manifestUrl: resolveRunHlsUrl(started.hlsUrl, api.baseUrl),
+      policyId: params.policyId,
+    });
+  } catch (error) {
+    await controller.complete('aborted');
+    throw error;
+  }
+
+  setStatus(`Runner-controlled run (${params.policyId}) is playing. Do not interact with this page.`, 'success');
+}
+
 async function startMockPreview() {
   const { run } = await createAndStartRun(true);
   const client = createTelemetry(run, api);
@@ -335,3 +398,18 @@ dashboard.render({
   levels: [],
   stalls: {},
 });
+
+let automation = null;
+
+try {
+  automation = readAutomationParams(window.location.search);
+} catch (error) {
+  for (const element of form.elements) element.disabled = true;
+  setStatus(`Invalid runner URL: ${error.message}`, 'error');
+}
+
+if (automation) {
+  startAutomatedRun(automation).catch((error) => {
+    setStatus(`Runner-controlled run failed: ${error.message}`, 'error');
+  });
+}

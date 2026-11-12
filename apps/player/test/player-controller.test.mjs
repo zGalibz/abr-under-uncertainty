@@ -56,6 +56,44 @@ test('custom policy enters manual mode through loadLevel and cleanup unregisters
   controller.destroy(); assert.equal(hls.destroyed, true); assert.equal(hls.handlers.size, 0); await client.close();
 });
 
+class FakeDocument {
+  constructor(visibilityState = 'visible') { this.visibilityState = visibilityState; this.listeners = new Map(); }
+  addEventListener(event, handler) { this.listeners.set(event, handler); }
+  removeEventListener(event) { this.listeners.delete(event); }
+  set(state) { this.visibilityState = state; this.listeners.get('visibilitychange')?.(); }
+}
+
+test('tab visibility changes are recorded as evidence, including a page hidden at start', async () => {
+  const doc = new FakeDocument(); const video = new FakeVideo(); const { client, events } = makeTelemetry();
+  const controller = new PlayerController({ HlsClass: FakeHls, video, telemetry: client, documentRef: doc });
+  await controller.start({ manifestUrl: '/stream/v1/r_x/master.m3u8', policyId: DEFAULT_POLICY_ID });
+  assert.equal(events.some((event) => event.type === 'client.visibility_changed'), false);
+  doc.set('hidden'); doc.set('visible');
+  assert.deepEqual(events.filter((event) => event.type === 'client.visibility_changed').map((event) => event.data.state), ['hidden', 'visible']);
+  controller.destroy(); assert.equal(doc.listeners.size, 0); await client.close();
+
+  const hiddenDoc = new FakeDocument('hidden'); const second = makeTelemetry();
+  const hiddenStart = new PlayerController({ HlsClass: FakeHls, video: new FakeVideo(), telemetry: second.client, documentRef: hiddenDoc });
+  await hiddenStart.start({ manifestUrl: '/stream/v1/r_x/master.m3u8', policyId: DEFAULT_POLICY_ID });
+  assert.deepEqual(second.events.filter((event) => event.type === 'client.visibility_changed').map((event) => event.data.state), ['hidden']);
+  hiddenStart.destroy(); await second.client.close();
+});
+
+test('client.finished is the last event: nothing is recorded after a terminal state', async () => {
+  const doc = new FakeDocument(); const video = new FakeVideo(); const { client, events } = makeTelemetry();
+  const controller = new PlayerController({ HlsClass: FakeHls, video, telemetry: client, documentRef: doc });
+  await controller.start({ manifestUrl: '/stream/v1/r_x/master.m3u8', policyId: POLICY_ID }); const hls = controller.hls;
+  hls.emit(FakeHls.Events.MANIFEST_PARSED, { levels, firstLevel: 0 });
+  await controller.complete('timeout');
+  assert.equal(events.at(-1).type, 'client.finished'); assert.equal(events.at(-1).data.reason, 'timeout');
+  const count = events.length;
+  hls.emit(FakeHls.Events.FRAG_LOADING, { frag: { type: 'main', sn: 9, level: 0, start: 18, duration: 2, url: 'http://127.0.0.1:8080/stream/v1/r_x/v0/seg_00009.ts' } });
+  hls.emit(FakeHls.Events.ERROR, { fatal: true, type: 'networkError', details: 'fragLoadError' });
+  video.emit('waiting'); video.emit('pause'); doc.set('hidden');
+  assert.equal(events.length, count); assert.equal(hls.handlers.size, 0); assert.equal(video.listeners.size, 0);
+  controller.destroy(); await client.close();
+});
+
 test('a fatal HLS error emits a terminal event and finalizes exactly once', async () => {
   const video = new FakeVideo(); const { client, events } = makeTelemetry(); let terminals = 0;
   const controller = new PlayerController({ HlsClass: FakeHls, video, telemetry: client, onTerminal: async () => { terminals += 1; } });

@@ -34,6 +34,7 @@ export class PlayerController {
     onState = () => {},
     onTerminal = async () => {},
     monoNow = () => performance.now(),
+    documentRef = globalThis.document,
   }) {
     this.HlsClass = HlsClass;
     this.video = video;
@@ -41,9 +42,11 @@ export class PlayerController {
     this.onState = onState;
     this.onTerminal = onTerminal;
     this.monoNow = monoNow;
+    this.documentRef = documentRef;
 
     this.listeners = [];
     this.mediaListeners = [];
+    this.documentListeners = [];
     this.policy = null;
     this.policyReady = false;
     this.hls = null;
@@ -88,6 +91,7 @@ export class PlayerController {
 
     this.bindHlsEvents();
     this.bindMediaEvents();
+    this.bindDocumentEvents();
 
     this.hls.loadSource(manifestUrl);
     this.hls.attachMedia(this.video);
@@ -107,6 +111,43 @@ export class PlayerController {
   bindMedia(event, handler) {
     this.video.addEventListener(event, handler);
     this.mediaListeners.push([event, handler]);
+  }
+
+  // A hidden tab is throttled by the browser, which would make the run unfair,
+  // so visibility changes are evidence (the validator marks such a run
+  // harness-invalid). A page that is already hidden at start is recorded too.
+  bindDocumentEvents() {
+    const doc = this.documentRef;
+    if (typeof doc?.addEventListener !== 'function') return;
+
+    const handler = () => {
+      this.telemetry.emit('client.visibility_changed', { state: doc.visibilityState });
+    };
+
+    doc.addEventListener('visibilitychange', handler);
+    this.documentListeners.push(['visibilitychange', handler]);
+
+    if (doc.visibilityState !== 'visible') handler();
+  }
+
+  // Nothing may follow client.finished in the evidence log, so every listener
+  // is removed as soon as the run is terminal.
+  detachListeners() {
+    for (const [event, handler] of this.listeners) {
+      this.hls?.off(event, handler);
+    }
+
+    for (const [event, handler] of this.mediaListeners) {
+      this.video.removeEventListener(event, handler);
+    }
+
+    for (const [event, handler] of this.documentListeners) {
+      this.documentRef?.removeEventListener?.(event, handler);
+    }
+
+    this.listeners = [];
+    this.mediaListeners = [];
+    this.documentListeners = [];
   }
 
   bindHlsEvents() {
@@ -487,6 +528,9 @@ export class PlayerController {
       ...quality,
     });
 
+    this.detachListeners();
+    this.hls?.stopLoad?.();
+
     this.terminalPromise = Promise.resolve(
       this.onTerminal({
         reason,
@@ -507,16 +551,7 @@ export class PlayerController {
   destroy() {
     clearInterval(this.sampleTimer);
 
-    for (const [event, handler] of this.listeners) {
-      this.hls?.off(event, handler);
-    }
-
-    for (const [event, handler] of this.mediaListeners) {
-      this.video.removeEventListener(event, handler);
-    }
-
-    this.listeners = [];
-    this.mediaListeners = [];
+    this.detachListeners();
     this.hls?.destroy();
     this.hls = null;
     this.runState = 'IDLE';
