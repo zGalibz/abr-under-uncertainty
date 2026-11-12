@@ -43,11 +43,16 @@ export function createPlaywrightDriver({ executablePath, headless, viewport, dev
         const video = page.video();
         await context.close().catch(() => {});
         if (video) {
-          // The video file is complete once its context has closed.
+          // The video file is complete once its context has closed. A failed
+          // recording (e.g. Playwright's ffmpeg missing) never stops the session.
           const params = new URL(url).searchParams;
           const target = path.join(recordVideoDir, `${params.get('runId')}-${params.get('policyId')}.webm`);
-          fs.renameSync(await video.path(), target);
-          session.consoleLines.push(`${stamp()} [runner] page recorded to ${target}`);
+          try {
+            fs.renameSync(await video.path(), target);
+            session.consoleLines.push(`${stamp()} [runner] page recorded to ${target}`);
+          } catch (e) {
+            session.consoleLines.push(`${stamp()} [runner] video NOT saved: ${e.message}`);
+          }
         }
       };
       return session;
