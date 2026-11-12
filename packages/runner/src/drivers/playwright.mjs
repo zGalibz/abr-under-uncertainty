@@ -6,10 +6,15 @@
 // disabled through the Chrome DevTools Protocol and service workers are
 // blocked, matching experiment.browser.cacheEnabled / serviceWorkersBypassed.
 
+//
+// recordVideoDir (demo mode only) records each page to
+// <dir>/<runId>-<policyId>.webm, the prerecorded fallback for the live demo.
+
 import fs from 'node:fs';
+import path from 'node:path';
 import { chromium } from 'playwright-core';
 
-export function createPlaywrightDriver({ executablePath, headless, viewport, deviceScaleFactor }) {
+export function createPlaywrightDriver({ executablePath, headless, viewport, deviceScaleFactor, recordVideoDir = null }) {
   let browser = null;
   return {
     name: 'playwright',
@@ -21,7 +26,8 @@ export function createPlaywrightDriver({ executablePath, headless, viewport, dev
     },
 
     async openSession({ url }) {
-      const context = await browser.newContext({ viewport, deviceScaleFactor, serviceWorkers: 'block' });
+      const recordVideo = recordVideoDir ? { dir: recordVideoDir, size: viewport } : undefined;
+      const context = await browser.newContext({ viewport, deviceScaleFactor, serviceWorkers: 'block', recordVideo });
       const page = await context.newPage();
       const cdp = await context.newCDPSession(page);
       await cdp.send('Network.enable');
@@ -33,7 +39,17 @@ export function createPlaywrightDriver({ executablePath, headless, viewport, dev
       page.on('crash', () => { session.failure = 'browser page crashed'; });
       page.on('close', () => { session.failure ??= 'player page was closed'; });
       await page.goto(url, { waitUntil: 'load' }).catch((e) => { session.failure = `could not load player page: ${e.message}`; });
-      session.close = async () => { await context.close().catch(() => {}); };
+      session.close = async () => {
+        const video = page.video();
+        await context.close().catch(() => {});
+        if (video) {
+          // The video file is complete once its context has closed.
+          const params = new URL(url).searchParams;
+          const target = path.join(recordVideoDir, `${params.get('runId')}-${params.get('policyId')}.webm`);
+          fs.renameSync(await video.path(), target);
+          session.consoleLines.push(`${stamp()} [runner] page recorded to ${target}`);
+        }
+      };
       return session;
     },
 

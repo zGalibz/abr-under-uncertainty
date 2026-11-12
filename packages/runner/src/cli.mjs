@@ -3,11 +3,14 @@
 //   npm run runner -- --mode warmup  --player-url <url>   one discarded run per policy (stable trace)
 //   npm run runner -- --mode dry-run --player-url <url>   one full run per policy (volatile trace by default)
 //   npm run runner -- --mode counted --player-url <url>   the frozen 18-run matrix from results/run-order.json
+//   npm run runner -- --mode demo --record <dir> --player-url <url>
+//                                                         one recorded run per policy (--trace), the demo fallback
 //
 // Options: --server (default http://127.0.0.1:8080), --raw (the server's
 // results root, default results/raw), --driver playwright|stub,
 // --chrome <path> (or CHROME_PATH), --headless, --trace <id> (dry-run),
-// --limit <n> (counted: stop after n cells), --max-attempts <n>.
+// --limit <n> (counted: stop after n cells), --max-attempts <n>,
+// --record <dir> (demo: save a .webm per run), --viewport WxH (demo only).
 
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
@@ -56,7 +59,7 @@ export function playerBuildProblem(build, git) {
 function cellsFor(mode, ctx, { trace, orderFile }) {
   const policies = ctx.experiment.player.policies;
   if (mode === 'warmup') return policies.map((policy) => ({ policy, trace: 'stable-v1', repetition: 1 }));
-  if (mode === 'dry-run') return policies.map((policy) => ({ policy, trace, repetition: 1 }));
+  if (mode === 'dry-run' || mode === 'demo') return policies.map((policy) => ({ policy, trace, repetition: 1 }));
   if (!fs.existsSync(orderFile)) throw new StopSession(`${path.relative(repoRoot, orderFile)} is missing; run "npm run runner:order" and commit it before counted runs`);
   const frozen = fs.readFileSync(orderFile, 'utf8');
   if (frozen !== `${JSON.stringify(buildOrderDocument(ctx), null, 2)}\n`) {
@@ -78,10 +81,14 @@ async function main() {
       trace: { type: 'string', default: 'volatile-v1' },
       limit: { type: 'string' },
       'max-attempts': { type: 'string', default: '3' },
+      record: { type: 'string' },
+      viewport: { type: 'string' },
     },
   });
   const mode = values.mode;
-  if (!['warmup', 'dry-run', 'counted'].includes(mode)) throw new StopSession('--mode must be warmup, dry-run or counted');
+  if (!['warmup', 'dry-run', 'counted', 'demo'].includes(mode)) throw new StopSession('--mode must be warmup, dry-run, counted or demo');
+  if (mode === 'demo' && !values.record) throw new StopSession('demo mode needs --record <dir> for the video files');
+  if (mode !== 'demo' && (values.record || values.viewport)) throw new StopSession('--record and --viewport are only for demo mode (they would change the measured apparatus)');
   const ctx = loadContext();
   const git = gitState();
   if (mode === 'counted' && git.dirty) throw new StopSession('counted runs require a clean git checkout (commit or stash your changes)');
@@ -105,13 +112,19 @@ async function main() {
   if (values.limit) cells = cells.slice(0, Number(values.limit));
 
   const b = ctx.experiment.browser;
+  // Demo recordings use a taller window so the dashboard is in the video;
+  // the player's ABR ignores the window size (capLevelToPlayerSize: false).
+  const [vw, vh] = (values.viewport ?? (mode === 'demo' ? '1280x1300' : '')).split('x').map(Number);
+  const recordVideoDir = mode === 'demo' ? path.resolve(repoRoot, values.record) : null;
+  if (recordVideoDir) fs.mkdirSync(recordVideoDir, { recursive: true });
   const driver = values.driver === 'stub'
     ? createStubDriver()
     : createPlaywrightDriver({
       executablePath: values.chrome ?? process.env.CHROME_PATH ?? b.executablePath,
       headless: values.headless || b.headless,
-      viewport: b.viewport,
+      viewport: vw && vh ? { width: vw, height: vh } : b.viewport,
       deviceScaleFactor: b.deviceScaleFactor,
+      recordVideoDir,
     });
   const { browserVersion } = await driver.start();
   const playerBuildCommit = playerBuild ? `${playerBuild.gitCommit}${playerBuild.gitDirty ? '-dirty' : ''}` : null;
@@ -121,7 +134,8 @@ async function main() {
       api, driver, ctx, mode, git, playerUrl,
       provenance: { driver: driver.name, browserVersion, playerBuildCommit },
       rawDir: path.resolve(repoRoot, values.raw),
-      ledgerFile: path.join(repoRoot, 'results/runner-ledger.ndjson'),
+      // Demo attempts never touch the counted ledger (its hash is in the data-freeze manifest).
+      ledgerFile: recordVideoDir ? path.join(recordVideoDir, 'ledger.ndjson') : path.join(repoRoot, 'results/runner-ledger.ndjson'),
       maxAttempts: Number(values['max-attempts']),
       log: console.log,
     });

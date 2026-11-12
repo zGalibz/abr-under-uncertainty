@@ -19,7 +19,7 @@ import { TERMINAL_STATUSES } from './api.mjs';
 
 // clientLabel marks what a run is for. The analysis counts only
 // runner-counted runs by default (COUNTED_LABELS in analysis/src/analyze.mjs).
-export const LABELS = { warmup: 'runner-warmup', 'dry-run': 'runner-dry-run', counted: 'runner-counted' };
+export const LABELS = { warmup: 'runner-warmup', 'dry-run': 'runner-dry-run', counted: 'runner-counted', demo: 'runner-demo' };
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 

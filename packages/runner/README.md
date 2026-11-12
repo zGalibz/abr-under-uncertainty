@@ -11,6 +11,7 @@ npm run server                       # Galib's server, in another terminal
 npm run runner -- --mode warmup  --player-url <url>   # 1 discarded run per policy (stable trace)
 npm run runner -- --mode dry-run --player-url <url>   # 1 full run per policy (--trace, default volatile-v1)
 npm run runner -- --mode counted --player-url <url>   # the frozen 18-run order; needs a clean git checkout
+npm run runner -- --mode demo --record results/dry-run/demo --player-url <url>   # 1 recorded run per policy (demo fallback)
 ```
 
 Options:
@@ -24,6 +25,8 @@ Options:
 | `--headless` | `experiment.browser.headless` | |
 | `--limit` | all | counted mode: stop after n cells (resumable) |
 | `--max-attempts` | 3 | attempts per cell before stopping |
+| `--record` | — | demo mode only: folder for one `<runId>-<policy>.webm` per run, plus that session's own `ledger.ndjson` |
+| `--viewport` | `1280x1300` in demo mode | demo mode only: taller window so the dashboard is in the video |
 
 ## Rules the runner enforces
 
@@ -32,7 +35,8 @@ Options:
 - **Watchdog.** If the browser crashes, or the run is not terminal within `stopPolicy.maxWallDurationMs` + 30 s, the run is aborted on the server.
 - **Reruns.** Only a harness-invalid attempt is rerun, and the ledger records `rerunOf`. A rejected run stops the session, because that means a logging or apparatus bug. A valid run is never rerun, whatever its outcome.
 - **Counted runs.** These require a clean git checkout and an unchanged `results/run-order.json`. They are resumable: cells with a valid counted run are skipped.
-- **Labels.** Each run's `clientLabel` is `runner-warmup`, `runner-dry-run` or `runner-counted`. The analysis excludes the first two by default (`--labels runner-dry-run` analyses dry runs only).
+- **Labels.** Each run's `clientLabel` is `runner-warmup`, `runner-dry-run`, `runner-counted` or `runner-demo`. The analysis counts only `runner-counted` by default (`--labels runner-dry-run` analyses dry runs only).
+- **Demo recordings** (the prerecorded fallback for the live demo) use their own label, their own ledger and a taller window; `--record`/`--viewport` are refused in every other mode, so they can never change a measured run.
 
 Ledger: `results/runner-ledger.ndjson`. Console output of each player page: `results/raw/<runId>/console.log`.
 
