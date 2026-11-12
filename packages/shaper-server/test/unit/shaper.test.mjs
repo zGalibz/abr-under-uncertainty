@@ -43,3 +43,39 @@ test('concurrent transfers share one FIFO run budget', async () => {
   assert.ok(clock.value >= 1900 && clock.value <= 2100, `elapsed ${clock.value}`);
   assert.equal(scheduler.cumulativeBytes, 2000);
 });
+
+// A response whose client is gone never emits 'drain'. The scheduler is one
+// FIFO per run, so waiting on such a response would starve every later
+// request of the run until the player times out.
+class ClosedWritable extends EventEmitter {
+  constructor() { super(); this.destroyed = true; this.writes = 0; }
+  write() { this.writes += 1; return false; }
+}
+
+class ClosesDuringBackpressureWritable extends EventEmitter {
+  constructor() { super(); this.destroyed = false; }
+  write() { setImmediate(() => { this.destroyed = true; this.emit('close'); }); return false; }
+}
+
+test('a response the client already closed is skipped instead of blocking the run queue', { timeout: 2000 }, async () => {
+  const clock = new FakeClock();
+  const scheduler = new FifoScheduler({ clock, schedule: compileSchedule(scenario), startMonoMs: 0, maxBurstBytes: 100, maxChunkBytes: 100, responseStartDelayMs: 0 });
+  const gone = new ClosedWritable();
+  const next = new FakeWritable();
+  const cancelled = scheduler.enqueue({ requestSeq: 1, acceptedMonoMs: 0, buffer: Buffer.alloc(300, 1), writable: gone });
+  const following = scheduler.enqueue({ requestSeq: 2, acceptedMonoMs: 0, buffer: Buffer.alloc(300, 2), writable: next });
+  await assert.rejects(cancelled, { name: 'AbortError' });
+  assert.equal((await following).bytesWritten, 300);
+  assert.equal(gone.writes, 0);
+});
+
+test('a response that closes while waiting for drain releases the run queue', { timeout: 2000 }, async () => {
+  const clock = new FakeClock();
+  const scheduler = new FifoScheduler({ clock, schedule: compileSchedule(scenario), startMonoMs: 0, maxBurstBytes: 100, maxChunkBytes: 100, responseStartDelayMs: 0 });
+  const stalled = new ClosesDuringBackpressureWritable();
+  const next = new FakeWritable();
+  const cancelled = scheduler.enqueue({ requestSeq: 1, acceptedMonoMs: 0, buffer: Buffer.alloc(300, 1), writable: stalled });
+  const following = scheduler.enqueue({ requestSeq: 2, acceptedMonoMs: 0, buffer: Buffer.alloc(300, 2), writable: next });
+  await assert.rejects(cancelled, { name: 'AbortError' });
+  assert.equal((await following).bytesWritten, 300);
+});
