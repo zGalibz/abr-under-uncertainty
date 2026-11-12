@@ -36,24 +36,39 @@ Options:
 
 Ledger: `results/runner-ledger.ndjson`. Console output of each player page: `results/raw/<runId>/console.log`.
 
-## Runner ↔ player contract (DRAFT, needs Susmoy's approval)
+## Runner ↔ player contract
 
-The runner opens:
+Implemented by the player's runner-controlled mode (`apps/player/src/automation.js`, wired in `apps/player/src/main.js`). The runner opens:
 
 ```text
 <player-url>?api=<server base URL>&runId=<runId>&policyId=<policy>&maxWallMs=<n>
 ```
 
-The player page must, with no user interaction:
+The player page then, with no user interaction:
 
-1. Read `runId` and `policyId` from the URL and use that policy.
-2. `POST /api/v1/runs/{runId}/start` with `clientSendMonoMs` taken from the **same clock as event `clientMonoMs`** (`performance.now()`). Reaction-time charts use it to place player events on the scenario clock.
-3. Load the returned `hlsUrl`, play muted, and post telemetry batches (≤ 200 events, contiguous `seq` from 0).
-4. Finish with `POST /finish` (`ended` / `timeout` after `maxWallMs` / `fatal_error`).
+1. Validates the URL (a malformed runner URL is refused, never turned into a manual run), locks the form and hides the video controls.
+2. `POST /api/v1/runs/{runId}/start` with `clientSendMonoMs` taken from the **same clock as event `clientMonoMs`** (`performance.now()`). Reaction-time charts use it to place player events on the scenario clock. If `/start` fails, the page aborts the run at once instead of waiting for the watchdog.
+3. Loads the returned `hlsUrl`, plays **muted**, and posts telemetry batches (≤ 200 events, contiguous `seq` from 0), including `client.visibility_changed`.
+4. Finishes with `POST /finish` (`ended`, `fatal_error`, or `timeout` after `maxWallMs`). `client.finished` is always the last event.
 
 The runner only watches the server's run status, so the player needs no other signal.
 
-`src/drivers/stub-player.mjs` is a working reference implementation of this protocol (lowest level only, no ABR).
+`src/drivers/stub-player.mjs` is a Node reference implementation of the same protocol (lowest level only, no ABR), used by the tests.
+
+## Full real-run sequence
+
+```bash
+CORS_ALLOWED_ORIGINS=http://127.0.0.1:4173 npm run server      # terminal 1: API + shaped media on :8080
+npm run build -w @abr-lab/player && npm run dev -w @abr-lab/player   # terminal 2: player page on :4173
+export CHROME_PATH=~/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome
+npm run runner -- --mode warmup  --player-url http://127.0.0.1:4173/
+npm run runner -- --mode dry-run --player-url http://127.0.0.1:4173/
+npm run runner -- --mode counted --player-url http://127.0.0.1:4173/   # needs a clean checkout + a player built from it
+npm run analyze -- --order results/run-order.json
+npm run freeze
+```
+
+The server does not serve the player page, so the page runs on its own origin and the server needs the CORS allowlist. For counted runs the player bundle must be rebuilt after the last commit: the runner compares `build-metadata.js` with `git rev-parse HEAD` and refuses a bundle from another commit or a dirty tree. The ledger is the only file the runner itself changes, so it does not count as a dirty checkout and an interrupted counted session can resume.
 
 ## Tests
 

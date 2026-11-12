@@ -22,10 +22,35 @@ import { createStubDriver } from './drivers/stub-player.mjs';
 import { buildOrderDocument } from './order.mjs';
 import { StopSession, runSchedule } from './runner.mjs';
 
+// The ledger is written by the runner itself during a session, so it does not
+// make the checkout "dirty"; otherwise an interrupted counted session could
+// never resume without a new commit (which would change the apparatus).
+export const RUNNER_OWNED_PATHS = ['results/runner-ledger.ndjson'];
+
 export function gitState(cwd = repoRoot) {
   const commit = execFileSync('git', ['rev-parse', 'HEAD'], { cwd, encoding: 'utf8' }).trim();
-  const dirty = execFileSync('git', ['status', '--porcelain'], { cwd, encoding: 'utf8' }).trim() !== '';
+  const excludes = RUNNER_OWNED_PATHS.map((p) => `:(exclude)${p}`);
+  const dirty = execFileSync('git', ['status', '--porcelain', '--', '.', ...excludes], { cwd, encoding: 'utf8' }).trim() !== '';
   return { commit, dirty };
+}
+
+// The player bundle records the commit it was built from
+// (apps/player/scripts/build.mjs writes build-metadata.js next to the page).
+export async function readPlayerBuild(playerUrl) {
+  const url = new URL('build-metadata.js', playerUrl);
+  const res = await fetch(url).catch((e) => { throw new StopSession(`player page is unreachable at ${url} (${e.message}); start it with "npm run dev -w @abr-lab/player"`); });
+  if (!res.ok) throw new StopSession(`could not read the player's build metadata at ${url} (HTTP ${res.status})`);
+  const json = (await res.text()).match(/BUILD_METADATA = (\{.*\});/)?.[1];
+  if (!json) throw new StopSession(`${url} does not contain BUILD_METADATA; rebuild the player`);
+  return JSON.parse(json);
+}
+
+// Counted runs must use a player bundle built from exactly this clean
+// checkout; otherwise the code under test might not be the committed code.
+export function playerBuildProblem(build, git) {
+  if (build.gitCommit !== git.commit) return `player bundle was built from ${String(build.gitCommit).slice(0, 8)}, but this checkout is ${git.commit.slice(0, 8)}`;
+  if (build.gitDirty) return 'player bundle was built from a checkout with uncommitted changes';
+  return null;
 }
 
 function cellsFor(mode, ctx, { trace, orderFile }) {
@@ -64,6 +89,14 @@ async function main() {
   const playerUrl = values['player-url'] ?? (values.driver === 'stub' ? 'stub://player' : null);
   if (!playerUrl) throw new StopSession('--player-url is required (the URL of Susmoy\'s player page)');
 
+  let playerBuild = null;
+  if (values.driver !== 'stub') {
+    playerBuild = await readPlayerBuild(playerUrl);
+    const problem = playerBuildProblem(playerBuild, git);
+    if (problem && mode === 'counted') throw new StopSession(`${problem}; rebuild with "npm run build -w @abr-lab/player" from a clean checkout`);
+    if (problem) console.warn(`WARNING: ${problem} (allowed for ${mode}, never for counted runs)`);
+  }
+
   const api = new ServerApi(values.server);
   const ready = await api.ready().catch((e) => ({ status: `unreachable (${e.message})` }));
   if (ready.status !== 'ready') throw new StopSession(`server at ${values.server} is not ready: ${ready.status}. Start it with "npm run server" and make sure media/ is present.`);
@@ -81,10 +114,12 @@ async function main() {
       deviceScaleFactor: b.deviceScaleFactor,
     });
   const { browserVersion } = await driver.start();
-  console.log(`Runner: mode=${mode} driver=${driver.name} (${browserVersion}) git=${git.commit.slice(0, 8)}${git.dirty ? ' (dirty)' : ''} cells=${cells.length}`);
+  const playerBuildCommit = playerBuild ? `${playerBuild.gitCommit}${playerBuild.gitDirty ? '-dirty' : ''}` : null;
+  console.log(`Runner: mode=${mode} driver=${driver.name} (${browserVersion}) git=${git.commit.slice(0, 8)}${git.dirty ? ' (dirty)' : ''}${playerBuildCommit ? ` player=${playerBuildCommit.slice(0, 8)}` : ''} cells=${cells.length}`);
   try {
     const summary = await runSchedule(cells, {
       api, driver, ctx, mode, git, playerUrl,
+      provenance: { driver: driver.name, browserVersion, playerBuildCommit },
       rawDir: path.resolve(repoRoot, values.raw),
       ledgerFile: path.join(repoRoot, 'results/runner-ledger.ndjson'),
       maxAttempts: Number(values['max-attempts']),

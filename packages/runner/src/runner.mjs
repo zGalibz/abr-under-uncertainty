@@ -17,8 +17,8 @@ import { evaluateRun } from '../../analysis/src/evaluate.mjs';
 import { listRunDirs, loadRun } from '../../analysis/src/io.mjs';
 import { TERMINAL_STATUSES } from './api.mjs';
 
-// clientLabel marks what a run is for. The analysis excludes warm-up and
-// dry-run labels from the counted dataset.
+// clientLabel marks what a run is for. The analysis counts only
+// runner-counted runs by default (COUNTED_LABELS in analysis/src/analyze.mjs).
 export const LABELS = { warmup: 'runner-warmup', 'dry-run': 'runner-dry-run', counted: 'runner-counted' };
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -128,7 +128,7 @@ export async function runSchedule(cells, deps) {
       const startedAt = new Date().toISOString();
       const result = await runAttempt(cell, deps);
       appendLedger(ledgerFile, {
-        mode, ...cell, attempt, rerunOf: previous, runId: result.runId, startedAt, endedAt: new Date().toISOString(),
+        mode, ...cell, attempt, rerunOf: previous, runId: result.runId, ...deps.provenance, startedAt, endedAt: new Date().toISOString(),
         serverStatus: result.serverStatus, abortReason: result.abortReason, validation: result.status, errors: result.errors, warnings: result.warnings,
       });
       log(`  → ${result.status}${result.errors.length ? `: ${result.errors[0]}` : ''}`);
