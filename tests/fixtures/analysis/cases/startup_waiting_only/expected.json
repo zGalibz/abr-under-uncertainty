@@ -1,0 +1,11 @@
+{
+  "case": "startup_waiting_only",
+  "why": "Long 3 s startup with two waiting events before first play: must count as startup, never as a stall.",
+  "status": "valid",
+  "metrics": {
+    "startup_delay_s": 3,
+    "rebuffer_count": 0,
+    "rebuffer_duration_s": 0,
+    "completed": true
+  }
+}

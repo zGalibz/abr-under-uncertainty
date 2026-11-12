@@ -1,0 +1,10 @@
+{
+  "case": "reaction_censored",
+  "why": "Never drops to a safe level before the low plateau ends: anchor is censored and has no value.",
+  "status": "valid",
+  "metrics": {
+    "reaction_anchor_n": 1,
+    "reaction_censored_n": 1,
+    "reaction_median_s": null
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "case": "short_waiting_debounced",
+  "why": "A 200 ms waiting blip is below the 250 ms threshold and is not a stall.",
+  "status": "valid",
+  "metrics": {
+    "rebuffer_count": 0,
+    "rebuffer_duration_s": 0
+  },
+  "warningIncludes": "under 250 ms"
+}

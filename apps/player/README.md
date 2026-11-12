@@ -40,6 +40,27 @@ level (`LEVEL_SWITCHING`) separately from the effective level
 (`LEVEL_SWITCHED`), so a requested switch is never presented as already
 played quality.
 
+## Runner-controlled runs (counted experiment)
+
+Counted runs are driven by Member 3's runner (`packages/runner`), not by the
+form. The runner creates the run (correct repetition, label and apparatus
+check) and opens:
+
+```text
+http://127.0.0.1:4173/?api=http://127.0.0.1:8080&runId=<runId>&policyId=<policy>&maxWallMs=240000
+```
+
+When `runId` is present, `src/automation.js` validates the parameters and
+`main.js` locks the form, hides the video controls, mutes the video, calls
+`/start`, plays, and finishes the run by itself (`ended`, `fatal_error`, or
+`timeout` after `maxWallMs`). A malformed runner URL is refused rather than
+turned into a manual run. The server must allow the page's origin:
+`CORS_ALLOWED_ORIGINS=http://127.0.0.1:4173 npm run server`.
+
+The controller records `client.visibility_changed` (a hidden tab is throttled,
+so the validator excludes such a run), and removes every listener when the run
+becomes terminal, so `client.finished` is always the last recorded event.
+
 ## ABR policies
 
 ### `default-hlsjs`

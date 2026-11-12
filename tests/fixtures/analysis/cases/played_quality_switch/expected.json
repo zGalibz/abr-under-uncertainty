@@ -1,0 +1,12 @@
+{
+  "case": "played_quality_switch",
+  "why": "First 3 fragments at 360p, the rest at 1080p: one up-switch; bitrate is media-time-weighted.",
+  "status": "valid",
+  "metrics": {
+    "switch_count": 1,
+    "up_switch_count": 1,
+    "down_switch_count": 0,
+    "switch_magnitude_kbps": 3940,
+    "tw_bitrate_kbps": 3518
+  }
+}

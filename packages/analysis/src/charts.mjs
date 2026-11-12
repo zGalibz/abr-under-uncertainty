@@ -1,0 +1,214 @@
+// Deterministic SVG charts from validated summaries (framework §10).
+// Specs are Vega-Lite JSON; the same inputs always produce the same SVG.
+
+import fs from 'node:fs';
+import path from 'node:path';
+import * as vega from 'vega';
+import * as vl from 'vega-lite';
+import { CONSERVATIVE_POLICY, DEFAULT_POLICY } from './summarize.mjs';
+
+// Fixed policy colours used by every chart.
+const POLICY_SCALE = { domain: [DEFAULT_POLICY, CONSERVATIVE_POLICY], range: ['#4C78A8', '#F58518'] };
+const TRACE_ORDER = ['stable-v1', 'gradual-v1', 'volatile-v1', 'outage-v1'];
+
+async function renderSvg(spec, file) {
+  const config = { legend: { labelLimit: 260 }, axis: { labelLimit: 260 } };
+  const compiled = vl.compile({ $schema: 'https://vega.github.io/schema/vega-lite/v6.json', background: 'white', config, ...spec }).spec;
+  const view = new vega.View(vega.parse(compiled), { renderer: 'none' });
+  const svg = await view.toSVG();
+  view.finalize();
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, svg);
+  return file;
+}
+
+// Paired dot/slope plot: one dot per run, a line joins the same repeat of
+// both policies, one panel per trace.
+function pairedSpec(runs, metric, label, note) {
+  const data = runs.filter((r) => r[metric] !== null).map((r) => ({
+    trace: r.trace_id, policy: r.policy_id, repeat: `repeat ${r.repeat_id}`, value: Number(r[metric]),
+  }));
+  const n = data.length;
+  return {
+    title: { text: label, subtitle: `each dot = one run; lines join matching repeats; n = ${n} runs${note ? `; ${note}` : ''}` },
+    data: { values: data },
+    facet: { column: { field: 'trace', type: 'nominal', sort: TRACE_ORDER, title: null } },
+    spec: {
+      width: 160,
+      height: 220,
+      layer: [
+        { mark: { type: 'line', color: '#999', strokeWidth: 1 }, encoding: { detail: { field: 'repeat' } } },
+        { mark: { type: 'point', filled: true, size: 70 }, encoding: { color: { field: 'policy', type: 'nominal', scale: POLICY_SCALE, title: 'policy' } } },
+      ],
+      encoding: {
+        x: { field: 'policy', type: 'nominal', sort: POLICY_SCALE.domain, axis: { labelAngle: -20, title: null } },
+        y: { field: 'value', type: 'quantitative', title: label },
+      },
+    },
+  };
+}
+
+function tradeoffSpec(cells) {
+  const get = (p, t, m) => cells.find((c) => c.policy_id === p && c.trace_id === t && c.metric === m);
+  const points = [];
+  for (const c of cells.filter((x) => x.metric === 'rebuffer_duration_s')) {
+    const br = get(c.policy_id, c.trace_id, 'tw_bitrate_kbps');
+    if (c.median === null || !br || br.median === null) continue;
+    points.push({ policy: c.policy_id, trace: c.trace_id, rebuffer: c.median, bitrate: br.median, n: c.n_valid, complete: `${c.n_complete}/${c.n_valid}` });
+  }
+  // With no stalls at all the x domain would collapse to a single point.
+  const maxRebuffer = Math.max(0, ...points.map((p) => p.rebuffer));
+  const subtitle = ['cell medians; bitrate from complete runs only; up-left is better'];
+  if (points.length && maxRebuffer === 0) subtitle.push('no stalls in any run: every cell median is 0 s');
+  return {
+    title: { text: 'Quality vs stalls trade-off', subtitle },
+    width: 420,
+    height: 300,
+    data: { values: points },
+    layer: [
+      {
+        mark: { type: 'point', filled: true, size: 120 },
+        encoding: {
+          color: { field: 'policy', type: 'nominal', scale: POLICY_SCALE },
+          shape: { field: 'trace', type: 'nominal', sort: TRACE_ORDER },
+          tooltip: [{ field: 'policy' }, { field: 'trace' }, { field: 'complete' }],
+        },
+      },
+    ],
+    encoding: {
+      x: { field: 'rebuffer', type: 'quantitative', title: 'median total rebuffering (s)', scale: { domain: [0, Math.max(1, maxRebuffer)] }, axis: { format: '.1f' } },
+      y: { field: 'bitrate', type: 'quantitative', title: 'median time-weighted bitrate (kbps)', scale: { zero: false } },
+    },
+  };
+}
+
+// One panel per trace, anchors in scenario-time order. Censored anchors are
+// drawn at the plateau length, the lower bound of the true value.
+function reactionSpec(anchorRows) {
+  const notExposed = anchorRows.filter((a) => a.status === 'not_exposed').length;
+  const data = anchorRows.filter((a) => a.status === 'ok' || a.status === 'censored').map((a) => ({
+    trace: a.trace_id,
+    anchor: `${String(a.anchor_id).replace(/-anchor$/, '')} @ ${Math.round(a.t_rel_ms / 1000)} s`,
+    t: a.t_rel_ms,
+    policy: a.policy_id,
+    value: a.censored ? (a.plateau_end_ms - a.t_rel_ms) / 1000 : a.reaction_s,
+    status: a.censored ? 'censored (drawn at plateau end)' : a.proactive_or_already_safe ? 'already safe (0 s)' : 'reacted',
+  }));
+  const subtitle = [`each mark = one anchor in one run; n = ${data.length}`];
+  if (notExposed) subtitle.push(`${notExposed} more anchor(s) not shown: no media request during the low plateau (not exposed)`);
+  return {
+    title: { text: 'Reaction time after capacity drops', subtitle },
+    data: { values: data },
+    facet: { column: { field: 'trace', type: 'nominal', sort: TRACE_ORDER, title: null } },
+    resolve: { scale: { x: 'independent' } },
+    spec: {
+      width: 300,
+      height: 240,
+      mark: { type: 'point', filled: true, size: 80, opacity: 0.85 },
+      encoding: {
+        x: { field: 'anchor', type: 'nominal', title: 'adverse anchor (scenario time)', sort: { field: 't', op: 'min' }, axis: { labelAngle: -30 } },
+        xOffset: { field: 'policy', type: 'nominal', sort: POLICY_SCALE.domain },
+        y: { field: 'value', type: 'quantitative', title: 'reaction time (s)' },
+        color: { field: 'policy', type: 'nominal', scale: POLICY_SCALE },
+        shape: { field: 'status', type: 'nominal', title: 'outcome' },
+      },
+    },
+  };
+}
+
+// Time series for one representative run: configured capacity, achieved
+// goodput and played bitrate on top, forward buffer below, stalls shaded in both.
+function timeseriesSpec(series) {
+  const { runId, policy, trace, capacity, achieved = [], played, buffer, stalls } = series;
+  const stallLayer = { data: { values: stalls }, mark: { type: 'rect', color: '#d62728', opacity: 0.2 }, encoding: { x: { field: 'start', type: 'quantitative' }, x2: { field: 'end' } } };
+  const xTitle = { title: 'time since play request (s)' };
+  const achievedLayer = achieved.length
+    ? [{ data: { values: achieved }, mark: { type: 'rect', color: '#9e9e9e', opacity: 0.45 }, encoding: { x: { field: 't', type: 'quantitative' }, x2: { field: 't2' }, y: { field: 'kbps', type: 'quantitative' }, y2: { datum: 0 } } }]
+    : [];
+  return {
+    title: { text: `${trace} — ${policy}`, subtitle: `representative run ${runId} (median rebuffering in its cell); red = stalls` },
+    vconcat: [
+      {
+        width: 560,
+        height: 180,
+        layer: [
+          stallLayer,
+          ...achievedLayer,
+          { data: { values: capacity }, mark: { type: 'line', interpolate: 'step-after', color: '#555', strokeDash: [4, 3] }, encoding: { x: { field: 't', type: 'quantitative', ...xTitle }, y: { field: 'kbps', type: 'quantitative', title: 'kbps' } } },
+          { data: { values: played }, mark: { type: 'line', interpolate: 'step-after', color: POLICY_SCALE.range[POLICY_SCALE.domain.indexOf(policy)] ?? '#000', strokeWidth: 2 }, encoding: { x: { field: 't', type: 'quantitative' }, y: { field: 'kbps', type: 'quantitative' } } },
+        ],
+        title: { text: `configured capacity (dashed) · ${achieved.length ? 'achieved media goodput per second, server log (grey bars) · ' : ''}played bitrate (solid)`, fontSize: 11 },
+      },
+      {
+        width: 560,
+        height: 120,
+        layer: [
+          stallLayer,
+          { data: { values: buffer }, mark: { type: 'line', color: '#2ca02c' }, encoding: { x: { field: 't', type: 'quantitative', ...xTitle }, y: { field: 's', type: 'quantitative', title: 'forward buffer (s)' } } },
+        ],
+      },
+    ],
+  };
+}
+
+// Trace diagram (design §11 figure 1): the configured capacity of every trace
+// against the measured peak bitrate of each rendition. Configured capacity
+// is the server shaper's target, not a measurement.
+function tracesSpec(traces, ladder, endS) {
+  const levels = ladder.map((l) => ({ level: l.level, kbps: l.bitrateBps / 1000, label: `${l.height}p peak ${Math.round(l.bitrateBps / 1000)}` }));
+  // Labels sit right of the plot: the lowest rung's below its line, every
+  // other rung's above its own line, so close rungs (360p/480p) never overlap.
+  const labelLayer = (lowest, baseline, dy) => ({
+    data: { values: levels.filter((l) => (l.level === levels[0].level) === lowest) },
+    mark: { type: 'text', align: 'left', baseline, dx: 6, dy, fontSize: 10, color: '#555' },
+    encoding: { x: { datum: endS }, y: { field: 'kbps', type: 'quantitative' }, text: { field: 'label' } },
+  });
+  return {
+    title: { text: 'Bandwidth traces vs the rendition ladder', subtitle: 'solid = configured media capacity (server shaper target); dotted = measured peak bitrate of each rendition' },
+    vconcat: traces.map(({ id, phases }) => {
+      const steps = phases.map((p) => ({ t: p.startMs / 1000, kbps: p.downlinkKbps }));
+      steps.push({ t: endS, kbps: phases.at(-1).downlinkKbps });
+      return {
+        title: { text: id, anchor: 'start', fontSize: 12 },
+        width: 560,
+        height: 130,
+        layer: [
+          { data: { values: levels }, mark: { type: 'rule', strokeDash: [2, 3], color: '#888' }, encoding: { y: { field: 'kbps', type: 'quantitative' } } },
+          labelLayer(true, 'top', 2),
+          labelLayer(false, 'bottom', -2),
+          {
+            data: { values: steps },
+            mark: { type: 'line', interpolate: 'step-after', color: '#333', strokeWidth: 2 },
+            encoding: {
+              x: { field: 't', type: 'quantitative', title: 'scenario time (s)', scale: { domain: [0, endS] } },
+              y: { field: 'kbps', type: 'quantitative', title: 'kbit/s', scale: { domain: [0, 7500] } },
+            },
+          },
+        ],
+      };
+    }),
+  };
+}
+
+export async function renderAll({ runs, cells, anchorRows, timeseries, traces = [], ladder = [], outDir }) {
+  const written = [];
+  if (traces.length && ladder.length) written.push(await renderSvg(tracesSpec(traces, ladder, 130), path.join(outDir, 'traces.svg')));
+  const paired = [
+    ['rebuffer_duration_s', 'Total rebuffering (s)'],
+    ['rebuffer_count', 'Rebuffer events (count)'],
+    ['tw_bitrate_kbps', 'Time-weighted played bitrate (kbps)', 'complete runs only'],
+    ['startup_delay_s', 'Startup delay (s)'],
+    ['switch_count', 'Played quality switches (count)'],
+    ['switch_magnitude_kbps', 'Summed switch magnitude (kbps)', 'sum of |Δ average bitrate| over played switches'],
+    ['buffer_p05_s', 'Forward buffer, 5th percentile (s)'],
+  ];
+  for (const [metric, label, note] of paired) {
+    written.push(await renderSvg(pairedSpec(runs, metric, label, note), path.join(outDir, `paired_${metric}.svg`)));
+  }
+  written.push(await renderSvg(tradeoffSpec(cells), path.join(outDir, 'tradeoff.svg')));
+  if (anchorRows.length) written.push(await renderSvg(reactionSpec(anchorRows), path.join(outDir, 'reaction_anchors.svg')));
+  for (const s of timeseries) {
+    written.push(await renderSvg(timeseriesSpec(s), path.join(outDir, `timeseries_${s.trace}_${s.policy}.svg`)));
+  }
+  return written;
+}

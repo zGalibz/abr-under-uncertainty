@@ -1,0 +1,116 @@
+{
+  "schemaVersion": "1.0.0",
+  "experimentId": "abr-under-uncertainty-v1",
+  "experimentSha256": "cef527eb5c5c8c8ef8ee9516ec779eee98fe883f696646250d5841881ff6d7ff",
+  "orderSeed": 20261109,
+  "order": [
+    {
+      "orderIndex": 1,
+      "policy": "conservative-throughput-v1",
+      "trace": "volatile-v1",
+      "repetition": 3
+    },
+    {
+      "orderIndex": 2,
+      "policy": "default-hlsjs",
+      "trace": "stable-v1",
+      "repetition": 2
+    },
+    {
+      "orderIndex": 3,
+      "policy": "default-hlsjs",
+      "trace": "gradual-v1",
+      "repetition": 3
+    },
+    {
+      "orderIndex": 4,
+      "policy": "default-hlsjs",
+      "trace": "volatile-v1",
+      "repetition": 3
+    },
+    {
+      "orderIndex": 5,
+      "policy": "default-hlsjs",
+      "trace": "volatile-v1",
+      "repetition": 2
+    },
+    {
+      "orderIndex": 6,
+      "policy": "conservative-throughput-v1",
+      "trace": "volatile-v1",
+      "repetition": 1
+    },
+    {
+      "orderIndex": 7,
+      "policy": "default-hlsjs",
+      "trace": "stable-v1",
+      "repetition": 3
+    },
+    {
+      "orderIndex": 8,
+      "policy": "default-hlsjs",
+      "trace": "gradual-v1",
+      "repetition": 1
+    },
+    {
+      "orderIndex": 9,
+      "policy": "conservative-throughput-v1",
+      "trace": "volatile-v1",
+      "repetition": 2
+    },
+    {
+      "orderIndex": 10,
+      "policy": "default-hlsjs",
+      "trace": "volatile-v1",
+      "repetition": 1
+    },
+    {
+      "orderIndex": 11,
+      "policy": "default-hlsjs",
+      "trace": "gradual-v1",
+      "repetition": 2
+    },
+    {
+      "orderIndex": 12,
+      "policy": "default-hlsjs",
+      "trace": "stable-v1",
+      "repetition": 1
+    },
+    {
+      "orderIndex": 13,
+      "policy": "conservative-throughput-v1",
+      "trace": "gradual-v1",
+      "repetition": 1
+    },
+    {
+      "orderIndex": 14,
+      "policy": "conservative-throughput-v1",
+      "trace": "stable-v1",
+      "repetition": 3
+    },
+    {
+      "orderIndex": 15,
+      "policy": "conservative-throughput-v1",
+      "trace": "stable-v1",
+      "repetition": 2
+    },
+    {
+      "orderIndex": 16,
+      "policy": "conservative-throughput-v1",
+      "trace": "gradual-v1",
+      "repetition": 3
+    },
+    {
+      "orderIndex": 17,
+      "policy": "conservative-throughput-v1",
+      "trace": "stable-v1",
+      "repetition": 1
+    },
+    {
+      "orderIndex": 18,
+      "policy": "conservative-throughput-v1",
+      "trace": "gradual-v1",
+      "repetition": 2
+    }
+  ]
+}

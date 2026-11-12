@@ -1,0 +1,6 @@
+{
+  "case": "invalid_tampered_after_finish",
+  "why": "events.ndjson was edited after the server hashed it at finish time. Evidence can no longer be trusted: rejected.",
+  "status": "rejected",
+  "errorIncludes": "modified after the run finished"
+}

@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "fixture-experiment",
+  "packageManifest": "media/package.json",
+  "packageManifestSha256": "32d9e7faa70ad4b489abd6c5e4e2ffdd1a11aeb9f93ce3e4723aeda01d5783e9",
+  "scenarioFiles": [
+    "tests/fixtures/analysis/scenario.stable.json",
+    "tests/fixtures/analysis/scenario.drop.json"
+  ],
+  "player": {
+    "hlsJsVersion": "1.7.4",
+    "policies": [
+      "default-hlsjs",
+      "conservative-throughput-v1"
+    ],
+    "capLevelToPlayerSize": false,
+    "sampleIntervalMs": 250,
+    "conservativePolicyVersion": "1.0.0"
+  },
+  "browser": {
+    "product": "chrome",
+    "executablePath": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    "headless": false,
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "deviceScaleFactor": 1,
+    "cacheEnabled": false,
+    "serviceWorkersBypassed": true
+  },
+  "execution": {
+    "repetitionsPerCell": 3,
+    "orderSeed": 20261109,
+    "freshBrowserContextPerRun": true,
+    "maxConcurrentRuns": 1
+  },
+  "stopPolicy": {
+    "stopOnEnded": true,
+    "stopOnFatalError": true,
+    "maxWallDurationMs": 240000
+  }
+}

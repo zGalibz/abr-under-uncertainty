@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "1.0.0",
+  "id": "fixture-drop",
+  "description": "Test-only scenario: one capacity drop at 10 s (safe level 3 -> 0 with the placeholder ladder), recovery at 20 s.",
+  "status": "frozen",
+  "clock": "server-monotonic-since-run-start",
+  "rateUnit": "decimal-kbit-per-second",
+  "responseStartDelayMs": 20,
+  "scheduler": {"scope": "per-run-aggregate-media-body", "discipline": "work-conserving-fifo", "initialTokensBytes": 0, "maxBurstBytes": 16384, "maxChunkBytes": 4096},
+  "phases": [
+    {"id": "high", "startMs": 0, "endMs": 10000, "downlinkKbps": 6000},
+    {"id": "low", "startMs": 10000, "endMs": 20000, "downlinkKbps": 1200},
+    {"id": "recovery", "startMs": 20000, "downlinkKbps": 6000}
+  ]
+}

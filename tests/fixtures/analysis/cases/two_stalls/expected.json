@@ -1,0 +1,10 @@
+{
+  "case": "two_stalls",
+  "why": "Two stalls (0.8 s and 2.0 s) must add up.",
+  "status": "valid",
+  "metrics": {
+    "rebuffer_count": 2,
+    "rebuffer_duration_s": 2.8,
+    "completed": true
+  }
+}

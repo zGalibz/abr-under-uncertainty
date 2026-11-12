@@ -1,0 +1,10 @@
+{
+  "case": "duplicate_waiting",
+  "why": "A second waiting event 300 ms into an open stall must not create a second stall.",
+  "status": "valid",
+  "metrics": {
+    "rebuffer_count": 1,
+    "rebuffer_duration_s": 1.5
+  },
+  "warningIncludes": "duplicate waiting"
+}

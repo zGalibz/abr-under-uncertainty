@@ -1,0 +1,6 @@
+{
+  "case": "invalid_hidden_at_start",
+  "why": "The tab was already hidden before playback started and never became visible, so the browser throttled the whole run. There is no change event during playback, so it must be caught from the state at first play: harness_invalid.",
+  "status": "harness_invalid",
+  "errorIncludes": "hidden when playback started"
+}

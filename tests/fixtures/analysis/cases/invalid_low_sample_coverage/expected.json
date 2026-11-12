@@ -1,0 +1,9 @@
+{
+  "case": "invalid_low_sample_coverage",
+  "why": "10 s of buffer samples are missing, so coverage is ~51% (< 95%): harness_invalid.",
+  "status": "harness_invalid",
+  "errorIncludes": "coverage",
+  "metrics": {
+    "sample_coverage": 0.5125
+  }
+}

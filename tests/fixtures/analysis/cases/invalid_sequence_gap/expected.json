@@ -1,0 +1,6 @@
+{
+  "case": "invalid_sequence_gap",
+  "why": "Event seq 10 is missing (lost telemetry). The evidence cannot be trusted: rejected.",
+  "status": "rejected",
+  "errorIncludes": "sequence gap"
+}

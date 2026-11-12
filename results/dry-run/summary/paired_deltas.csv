@@ -1,0 +1,13 @@
+trace_id,repeat_id,metric,default_value,conservative_value,delta_c_minus_d,improvement_signed
+volatile-v1,1,startup_delay_s,1.4057,0.2922,-1.1135,1.1135
+volatile-v1,1,rebuffer_count,0,0,0,0
+volatile-v1,1,rebuffer_duration_s,0,0,0,0
+volatile-v1,1,rebuffer_ratio,0,0,0,0
+volatile-v1,1,tw_bitrate_kbps,1974.992336,1941.564959,-33.427377,-33.427377
+volatile-v1,1,switch_count,10,10,0,0
+volatile-v1,1,switch_magnitude_kbps,9435.099,10428.312,993.213,-993.213
+volatile-v1,1,buffer_mean_s,26.372055,33.119193,6.747137,6.747137
+volatile-v1,1,buffer_p05_s,4.006057,6.109742,2.103685,2.103685
+volatile-v1,1,low_buffer_fraction,0.003282,0.003647,0.000365,-0.000365
+volatile-v1,1,reaction_median_s,11.124502,NA,NA,NA
+volatile-v1,1,reaction_worst_s,11.124502,NA,NA,NA

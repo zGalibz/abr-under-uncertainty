@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "1.0.0",
+  "runId": "r_01a1be76-8209-7d2d-8bb4-e2ab94f4ba58",
+  "requestId": "00000000-0000-4000-8000-000000000009",
+  "status": "COMPLETED",
+  "experimentId": "fixture-experiment",
+  "experimentSha256": "91ff05f3f22792f4167909dbd51a908c935709dd0843bfadafcc57293268bffa",
+  "scenarioId": "fixture-stable",
+  "scenarioSha256": "3f53a539110a235ef02d56a089f240273d6e9faadc89048d9a7784bef9254709",
+  "packageSha256": "32d9e7faa70ad4b489abd6c5e4e2ffdd1a11aeb9f93ce3e4723aeda01d5783e9",
+  "policyId": "default-hlsjs",
+  "repetition": 1,
+  "orderSeed": 1,
+  "clientLabel": "synthetic-fixture",
+  "gitCommit": "0000000000000000000000000000000000000000",
+  "gitDirty": false,
+  "createdAt": "2026-11-09T04:00:00.000Z",
+  "startedAt": "2026-11-09T04:00:01.000Z",
+  "finishedAt": "2026-11-09T04:00:30.000Z",
+  "finishReason": "ended",
+  "failureCode": null,
+  "warnings": [],
+  "artifacts": {
+    "events.ndjson": "02674ade478704d67cdf5876f6e62756308c62999ff1997ab925ee0dc33a3856",
+    "server-requests.ndjson": "0a2b771f4a60f058fa518f01595a8d5f6832666fa2557c2687e69bfa77b0d411",
+    "scheduler-writes.ndjson": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "startRequest": {
+    "clientSendEpochMs": 1794196801000,
+    "clientSendMonoMs": 1000
+  },
+  "serverRunStartEpochMs": 1794196801000,
+  "serverRunStartMonoMs": 5000
+}

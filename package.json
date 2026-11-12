@@ -16,12 +16,21 @@
     "test:contracts": "node --test tests/contract/*.test.mjs",
     "test:media": "npm test -w @abr-lab/media-cli",
     "test:server": "npm test -w @abr-lab/shaper-server",
-    "test": "npm run test:contracts && npm run test:media && npm run test:server",
+    "test": "npm run test:contracts && npm run test:media && npm run test:server && npm run test:runner && npm run test:player",
     "media:package": "npm run package -w @abr-lab/media-cli --",
     "media:validate": "npm run validate -w @abr-lab/media-cli --",
     "scenarios:compile": "npm run scenarios:compile -w @abr-lab/shaper-server",
     "server": "npm run serve -w @abr-lab/shaper-server",
-    "calibrate:scenarios": "npm run calibrate -w @abr-lab/shaper-server"
+    "calibrate:scenarios": "npm run calibrate -w @abr-lab/shaper-server",
+    "test:analysis": "node --test tests/contract/analysis-*.test.mjs",
+    "fixtures:analysis": "node tests/fixtures/analysis/build-fixtures.mjs",
+    "synthetic": "node packages/analysis/src/synthetic/simulate.mjs && node packages/analysis/src/analyze.mjs --raw results/synthetic/raw --out results/synthetic --order results/synthetic/run-order.json --labels synthetic-sim",
+    "analyze": "node packages/analysis/src/analyze.mjs --raw results/raw --out results",
+    "test:runner": "npm test -w @abr-lab/runner",
+    "runner:order": "node packages/runner/src/order.mjs",
+    "runner": "node packages/runner/src/cli.mjs",
+    "freeze": "node packages/analysis/src/freeze.mjs",
+    "test:player": "npm test -w @abr-lab/player"
   },
   "devDependencies": {
     "ajv": "8.20.0",

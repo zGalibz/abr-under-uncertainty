@@ -1,0 +1,12 @@
+{
+  "case": "reaction_not_exposed",
+  "why": "All ten fragments are requested at the start (as stock hls.js does on a fast link), so there is no media request at all during the 10-20 s low plateau. The policy never had to choose a level under the drop: not_exposed, which is neither a reaction nor a censored (slow) one, and is left out of reaction statistics.",
+  "status": "valid",
+  "metrics": {
+    "reaction_anchor_n": 0,
+    "reaction_censored_n": 0,
+    "reaction_not_exposed_n": 1,
+    "reaction_median_s": null,
+    "tw_bitrate_kbps": 4700
+  }
+}

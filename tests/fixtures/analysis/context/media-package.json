@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "1.0.0",
+  "assetId": "fixture",
+  "durationSeconds": 20,
+  "renditions": [
+    {
+      "id": "v0",
+      "width": 640,
+      "height": 360,
+      "measuredPeakBps": 800000,
+      "measuredAverageBps": 760000,
+      "codecs": "avc1.64001e,mp4a.40.2"
+    },
+    {
+      "id": "v1",
+      "width": 854,
+      "height": 480,
+      "measuredPeakBps": 1400000,
+      "measuredAverageBps": 1330000,
+      "codecs": "avc1.64001f,mp4a.40.2"
+    },
+    {
+      "id": "v2",
+      "width": 1280,
+      "height": 720,
+      "measuredPeakBps": 2800000,
+      "measuredAverageBps": 2650000,
+      "codecs": "avc1.64001f,mp4a.40.2"
+    },
+    {
+      "id": "v3",
+      "width": 1920,
+      "height": 1080,
+      "measuredPeakBps": 5000000,
+      "measuredAverageBps": 4700000,
+      "codecs": "avc1.640028,mp4a.40.2"
+    }
+  ]
+}
