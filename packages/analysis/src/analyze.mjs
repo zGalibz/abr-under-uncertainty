@@ -31,6 +31,8 @@ const RUN_COLUMNS = [
   'played_media_s', 'wall_session_s', 'start_skew_ms', 'sample_coverage', 'raw_sha256',
   // extra columns beyond the framework's required list
   'validation_status', 'rebuffer_censored_n', 'reaction_censored_n', 'reaction_not_exposed_n', 'rerun_of',
+  // exploratory diagnostics added after data collection (not pre-registered)
+  'download_end_s', 'media_mb',
 ];
 const CELL_COLUMNS = ['policy_id', 'trace_id', 'metric', 'unit', 'n_valid', 'values_json', 'median', 'min', 'max', 'mean', 'sample_sd', 'n_complete'];
 const PAIRED_COLUMNS = ['trace_id', 'repeat_id', 'metric', 'default_value', 'conservative_value', 'delta_c_minus_d', 'improvement_signed'];

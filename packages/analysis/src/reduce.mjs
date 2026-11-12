@@ -219,6 +219,19 @@ export function mediaRequests(serverRequests) {
     .sort((a, b) => a.atMs - b.atMs);
 }
 
+// Exploratory, added after data collection (not pre-registered): when the
+// player stopped fetching media and how many media bytes it fetched, from the
+// server's request log (scenario clock). Explains exposure to late trace
+// phases; reported as diagnostics, never as an outcome.
+function downloadSummary(serverRequests) {
+  const media = (serverRequests ?? []).filter((r) => r.method === 'GET' && SEGMENT_PATH.test(r.path));
+  if (media.length === 0) return { endS: null, mb: null };
+  return {
+    endS: Math.max(...media.map((r) => r.lastByteAtRunMs ?? r.acceptedAtRunMs)) / 1000,
+    mb: media.reduce((sum, r) => sum + (r.bodyBytesWritten ?? 0), 0) / 1e6,
+  };
+}
+
 // Reaction time per anchor (framework §4.6): time from the capacity drop to
 // the first media request at or below the new safe level that completed and
 // was buffered by the player.
@@ -294,6 +307,7 @@ export function reduceRun({ run, events: unsorted, serverRequests }, ctx) {
   const zero = clientMonoAtRunZero(run);
   const reactions = reduceReactions(events, anchors, run, serverRequests, zero === null ? Infinity : tTerminal - zero);
   const scored = reactions.filter((r) => r.status === 'ok' || r.status === 'censored');
+  const download = downloadSummary(serverRequests);
   const reactionValues = scored.filter((r) => !r.censored).map((r) => r.reaction_s);
 
   const metrics = {
@@ -329,6 +343,8 @@ export function reduceRun({ run, events: unsorted, serverRequests }, ctx) {
     wall_session_s: finished && tRequest !== null ? (t(finished) - tRequest) / 1000 : null,
     start_skew_ms: null, // needs server logs (Galib's server-requests.ndjson); not available yet
     sample_coverage: buffer.coverage,
+    download_end_s: download.endS,
+    media_mb: download.mb,
   };
 
   return {
