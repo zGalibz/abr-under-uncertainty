@@ -198,7 +198,10 @@ export async function analyze({ rawDir, outDir, contextFiles, orderFile, labels 
         timeseries.push(buildSeries(loaded, reduced, ctx));
       }
     }
-    figures = await renderAll({ runs: valid, cells, anchorRows, timeseries, outDir: path.join(outDir, 'figures') });
+    const traces = [...ctx.scenarios.values()]
+      .filter((s) => ctx.experiment.scenarioFiles.includes(s.path))
+      .map((s) => ({ id: s.id, phases: s.scenario.phases }));
+    figures = await renderAll({ runs: valid, cells, anchorRows, timeseries, traces, ladder: ctx.ladder, outDir: path.join(outDir, 'figures') });
   }
 
   log(`Validation: ${report.counts.valid} valid, ${report.counts.harnessInvalid} harness-invalid, ${report.counts.rejected} rejected`);

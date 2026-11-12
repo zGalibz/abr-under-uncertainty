@@ -138,14 +138,47 @@ function timeseriesSpec(series) {
   };
 }
 
-export async function renderAll({ runs, cells, anchorRows, timeseries, outDir }) {
+// Trace diagram (design §11 figure 1): the configured capacity of every trace
+// against the measured peak bitrate of each rendition. Configured capacity
+// is the server shaper's target, not a measurement.
+function tracesSpec(traces, ladder, endS) {
+  const levels = ladder.map((l) => ({ kbps: l.bitrateBps / 1000, label: `${l.height}p peak ${Math.round(l.bitrateBps / 1000)}` }));
+  return {
+    title: { text: 'Bandwidth traces vs the rendition ladder', subtitle: 'solid = configured media capacity (server shaper target); dotted = measured peak bitrate of each rendition' },
+    vconcat: traces.map(({ id, phases }) => {
+      const steps = phases.map((p) => ({ t: p.startMs / 1000, kbps: p.downlinkKbps }));
+      steps.push({ t: endS, kbps: phases.at(-1).downlinkKbps });
+      return {
+        title: { text: id, anchor: 'start', fontSize: 12 },
+        width: 560,
+        height: 110,
+        layer: [
+          { data: { values: levels }, mark: { type: 'rule', strokeDash: [2, 3], color: '#888' }, encoding: { y: { field: 'kbps', type: 'quantitative' } } },
+          { data: { values: levels }, mark: { type: 'text', align: 'left', baseline: 'bottom', dx: 3, dy: -1, fontSize: 9, color: '#666' }, encoding: { x: { datum: 0 }, y: { field: 'kbps', type: 'quantitative' }, text: { field: 'label' } } },
+          {
+            data: { values: steps },
+            mark: { type: 'line', interpolate: 'step-after', color: '#333', strokeWidth: 2 },
+            encoding: {
+              x: { field: 't', type: 'quantitative', title: 'scenario time (s)', scale: { domain: [0, endS] } },
+              y: { field: 'kbps', type: 'quantitative', title: 'kbit/s', scale: { domain: [0, 7500] } },
+            },
+          },
+        ],
+      };
+    }),
+  };
+}
+
+export async function renderAll({ runs, cells, anchorRows, timeseries, traces = [], ladder = [], outDir }) {
   const written = [];
+  if (traces.length && ladder.length) written.push(await renderSvg(tracesSpec(traces, ladder, 130), path.join(outDir, 'traces.svg')));
   const paired = [
     ['rebuffer_duration_s', 'Total rebuffering (s)'],
     ['rebuffer_count', 'Rebuffer events (count)'],
     ['tw_bitrate_kbps', 'Time-weighted played bitrate (kbps)', 'complete runs only'],
     ['startup_delay_s', 'Startup delay (s)'],
     ['switch_count', 'Played quality switches (count)'],
+    ['switch_magnitude_kbps', 'Summed switch magnitude (kbps)', 'sum of |Δ average bitrate| over played switches'],
     ['buffer_p05_s', 'Forward buffer, 5th percentile (s)'],
   ];
   for (const [metric, label, note] of paired) {
