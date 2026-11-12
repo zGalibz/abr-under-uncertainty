@@ -21,6 +21,8 @@ Across 18 counted runs (2 policies × 3 traces × 3 repeats, all valid and compl
 
 **The one harness-invalid attempt.** Cell #8 (`gradual-v1`, default, repeat 1), attempt 1 (`r_01a1cea7…`). The host's network changed briefly: Chrome logged `net::ERR_NETWORK_CHANGED` twice. hls.js reported the aborted load with response code 0, the player forwarded it as `httpStatus: 0`, and the telemetry schema allows only 100–599 or null. The server therefore rejected every telemetry batch (777 × HTTP 422). The run could not finalize, the runner's watchdog aborted it, and the validator classified it harness-invalid under the pre-registered rule. It stored no events at all, so it could not have influenced any result. The rerun (`r_01a1ceab…`) is valid, and the ledger records the lineage. The player bug was fixed after data collection (`3bd28d8`); dataset v1 used the unfixed apparatus throughout, and no other run saw a network change.
 
+**A server bug found after data collection.** While the demo fallback videos were being recorded, 2 of 3 conservative-policy runs froze: the server's per-run shaper queue waited forever on a segment request the browser had cancelled, so every later segment of the run got no bytes (fixed in PR #6). The counted runs were not affected. The shaper logs every `backpressure-start` it enters, and all 19 counted attempts logged none. A frozen run cannot complete anyway, and all 18 valid runs completed normally.
+
 ## 3. Results by trace
 
 Primary summary: median [min, max] over 3 runs. Paired Δ = conservative − default for the same repeat. Mean and sample SD are in `results/summary/cells.csv`; every pair is in `results/summary/paired_deltas.csv`.

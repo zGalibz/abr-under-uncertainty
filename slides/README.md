@@ -32,6 +32,8 @@ Open `http://127.0.0.1:4173/` in Chrome and choose **conservative-throughput-v1*
 
 A demo started from the page is labelled `browser-player`, so it can never enter the counted dataset: the analysis counts only `runner-counted` runs.
 
+**Run the live demo only on a server that includes PR #6.** Without that fix, the conservative policy can freeze the stream when it cancels a request at startup (it happened in 2 of 3 conservative demo recordings). If #6 is not merged by the talk, use the fallback.
+
 ## Fallback (if anything fails during the demo)
 
 Go to the deck's demo slide (it plays the recording), or play the `.webm` files from `results/dry-run/demo/`. To re-record them:
