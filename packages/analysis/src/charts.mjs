@@ -56,8 +56,12 @@ function tradeoffSpec(cells) {
     if (c.median === null || !br || br.median === null) continue;
     points.push({ policy: c.policy_id, trace: c.trace_id, rebuffer: c.median, bitrate: br.median, n: c.n_valid, complete: `${c.n_complete}/${c.n_valid}` });
   }
+  // With no stalls at all the x domain would collapse to a single point.
+  const maxRebuffer = Math.max(0, ...points.map((p) => p.rebuffer));
+  const subtitle = ['cell medians; bitrate from complete runs only; up-left is better'];
+  if (points.length && maxRebuffer === 0) subtitle.push('no stalls in any run: every cell median is 0 s');
   return {
-    title: { text: 'Quality vs stalls trade-off', subtitle: 'cell medians; bitrate from complete runs only; up-left is better' },
+    title: { text: 'Quality vs stalls trade-off', subtitle },
     width: 420,
     height: 300,
     data: { values: points },
@@ -72,33 +76,42 @@ function tradeoffSpec(cells) {
       },
     ],
     encoding: {
-      x: { field: 'rebuffer', type: 'quantitative', title: 'median total rebuffering (s)' },
+      x: { field: 'rebuffer', type: 'quantitative', title: 'median total rebuffering (s)', scale: { domain: [0, Math.max(1, maxRebuffer)] }, axis: { format: '.1f' } },
       y: { field: 'bitrate', type: 'quantitative', title: 'median time-weighted bitrate (kbps)', scale: { zero: false } },
     },
   };
 }
 
+// One panel per trace, anchors in scenario-time order. Censored anchors are
+// drawn at the plateau length, the lower bound of the true value.
 function reactionSpec(anchorRows) {
   const notExposed = anchorRows.filter((a) => a.status === 'not_exposed').length;
   const data = anchorRows.filter((a) => a.status === 'ok' || a.status === 'censored').map((a) => ({
-    anchor: a.anchor_id,
+    trace: a.trace_id,
+    anchor: `${String(a.anchor_id).replace(/-anchor$/, '')} @ ${Math.round(a.t_rel_ms / 1000)} s`,
+    t: a.t_rel_ms,
     policy: a.policy_id,
-    // Censored anchors are drawn at the plateau length, the lower bound of the true value.
     value: a.censored ? (a.plateau_end_ms - a.t_rel_ms) / 1000 : a.reaction_s,
-    status: a.censored ? 'censored (no reaction before plateau ended)' : a.proactive_or_already_safe ? 'already safe (0 s)' : 'reacted',
+    status: a.censored ? 'censored (drawn at plateau end)' : a.proactive_or_already_safe ? 'already safe (0 s)' : 'reacted',
   }));
+  const subtitle = [`each mark = one anchor in one run; n = ${data.length}`];
+  if (notExposed) subtitle.push(`${notExposed} more anchor(s) not shown: no media request during the low plateau (not exposed)`);
   return {
-    title: { text: 'Reaction time after capacity drops', subtitle: `each mark = one anchor in one run; n = ${data.length}${notExposed ? `; ${notExposed} anchor(s) not shown: no media request during the low plateau (not exposed)` : ''}` },
-    width: 520,
-    height: 260,
+    title: { text: 'Reaction time after capacity drops', subtitle },
     data: { values: data },
-    mark: { type: 'point', filled: true, size: 70, opacity: 0.8 },
-    encoding: {
-      x: { field: 'anchor', type: 'nominal', title: 'reaction anchor', axis: { labelAngle: -30 } },
-      xOffset: { field: 'policy', type: 'nominal', sort: POLICY_SCALE.domain },
-      y: { field: 'value', type: 'quantitative', title: 'reaction time (s)' },
-      color: { field: 'policy', type: 'nominal', scale: POLICY_SCALE },
-      shape: { field: 'status', type: 'nominal', title: 'outcome' },
+    facet: { column: { field: 'trace', type: 'nominal', sort: TRACE_ORDER, title: null } },
+    resolve: { scale: { x: 'independent' } },
+    spec: {
+      width: 300,
+      height: 240,
+      mark: { type: 'point', filled: true, size: 80, opacity: 0.85 },
+      encoding: {
+        x: { field: 'anchor', type: 'nominal', title: 'adverse anchor (scenario time)', sort: { field: 't', op: 'min' }, axis: { labelAngle: -30 } },
+        xOffset: { field: 'policy', type: 'nominal', sort: POLICY_SCALE.domain },
+        y: { field: 'value', type: 'quantitative', title: 'reaction time (s)' },
+        color: { field: 'policy', type: 'nominal', scale: POLICY_SCALE },
+        shape: { field: 'status', type: 'nominal', title: 'outcome' },
+      },
     },
   };
 }
@@ -142,7 +155,14 @@ function timeseriesSpec(series) {
 // against the measured peak bitrate of each rendition. Configured capacity
 // is the server shaper's target, not a measurement.
 function tracesSpec(traces, ladder, endS) {
-  const levels = ladder.map((l) => ({ kbps: l.bitrateBps / 1000, label: `${l.height}p peak ${Math.round(l.bitrateBps / 1000)}` }));
+  const levels = ladder.map((l) => ({ level: l.level, kbps: l.bitrateBps / 1000, label: `${l.height}p peak ${Math.round(l.bitrateBps / 1000)}` }));
+  // Labels sit right of the plot: the lowest rung's below its line, every
+  // other rung's above its own line, so close rungs (360p/480p) never overlap.
+  const labelLayer = (lowest, baseline, dy) => ({
+    data: { values: levels.filter((l) => (l.level === levels[0].level) === lowest) },
+    mark: { type: 'text', align: 'left', baseline, dx: 6, dy, fontSize: 10, color: '#555' },
+    encoding: { x: { datum: endS }, y: { field: 'kbps', type: 'quantitative' }, text: { field: 'label' } },
+  });
   return {
     title: { text: 'Bandwidth traces vs the rendition ladder', subtitle: 'solid = configured media capacity (server shaper target); dotted = measured peak bitrate of each rendition' },
     vconcat: traces.map(({ id, phases }) => {
@@ -151,10 +171,11 @@ function tracesSpec(traces, ladder, endS) {
       return {
         title: { text: id, anchor: 'start', fontSize: 12 },
         width: 560,
-        height: 110,
+        height: 130,
         layer: [
           { data: { values: levels }, mark: { type: 'rule', strokeDash: [2, 3], color: '#888' }, encoding: { y: { field: 'kbps', type: 'quantitative' } } },
-          { data: { values: levels }, mark: { type: 'text', align: 'left', baseline: 'bottom', dx: 3, dy: -1, fontSize: 9, color: '#666' }, encoding: { x: { datum: 0 }, y: { field: 'kbps', type: 'quantitative' }, text: { field: 'label' } } },
+          labelLayer(true, 'top', 2),
+          labelLayer(false, 'bottom', -2),
           {
             data: { values: steps },
             mark: { type: 'line', interpolate: 'step-after', color: '#333', strokeWidth: 2 },
