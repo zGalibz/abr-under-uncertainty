@@ -10,6 +10,7 @@ import { verifyPackagePayload } from '../platform/package-readiness.mjs';
 import { rewritePlaylist } from '../domain/playlist-rewriter.mjs';
 import { parseSingleRange } from '../domain/range.mjs';
 import { FifoScheduler, systemClock } from '../shaping/fifo-scheduler.mjs';
+import { applyCors } from './cors.mjs';
 
 const telemetrySchemaPath = fileURLToPath(new URL('../../../../contracts/schemas/telemetry-event.schema.json', import.meta.url));
 const MIME = { '.m3u8': 'application/vnd.apple.mpegurl; charset=utf-8', '.ts': 'video/mp2t' };
@@ -62,7 +63,7 @@ function streamMatch(rawUrl) {
   return match ? { runId: match[1], rawAsset: match[2], hasQuery: rawUrl.includes('?') } : null;
 }
 
-export async function createExperimentServer({ packageRoot, resultsRoot, scenarios, experiment, clock = systemClock }) {
+export async function createExperimentServer({ packageRoot, resultsRoot, scenarios, experiment, allowedOrigins = new Set(), clock = systemClock }) {
   const ajv = new Ajv2020({ allErrors: true, strict: true });
   addFormats(ajv);
   const validateEvent = ajv.compile(JSON.parse(await readFile(telemetrySchemaPath, 'utf8')));
@@ -140,6 +141,22 @@ export async function createExperimentServer({ packageRoot, resultsRoot, scenari
   }
 
   const server = createServer(async (request, response) => {
+    const corsResult = applyCors(request, response, allowedOrigins);
+
+    if (!corsResult.allowed) {
+      sendJson(response, 403, {
+        code: 'CORS_ORIGIN_DENIED',
+        message: 'Origin is not allowed',
+      });
+      return;
+    }
+
+    if (corsResult.preflight) {
+      response.writeHead(204, { 'cache-control': 'no-store' });
+      response.end();
+      return;
+    }
+
     try {
       const rawUrl = request.url ?? '/';
       if (request.method === 'GET' && rawUrl === '/healthz') { sendJson(response, 200, { status: 'ok' }); return; }

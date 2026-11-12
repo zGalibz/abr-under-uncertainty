@@ -1,0 +1,7 @@
+:root { color-scheme: dark; font-family: system-ui, sans-serif; background: #101726; color: #e7edf8; }
+body { margin: 0; } main { max-width: 1120px; margin: auto; padding: 2rem; } h1 { margin-bottom: .2rem; }
+.controls, .dashboard, .player { background: #1a2437; border-radius: .5rem; padding: 1rem; margin-top: 1rem; } form, dl { display: flex; flex-wrap: wrap; gap: 1rem; align-items: end; }
+label { display: grid; gap: .35rem; } input, select, button { font: inherit; padding: .45rem; } button { background: #77bdfb; color: #07111f; border: 0; border-radius: .25rem; font-weight: 700; cursor: pointer; }
+video { width: 100%; max-height: 560px; background: #000; } dl div { min-width: 205px; } dt { color: #aab8d2; font-size: .85rem; } dd { margin: .25rem 0 0; overflow-wrap: anywhere; }
+#status[data-tone="error"] { color: #ff9f9f; } #status[data-tone="success"] { color: #9eecba; } #status[data-tone="warning"] { color: #f9d888; }
+ol { max-height: 260px; overflow: auto; font-family: ui-monospace, monospace; font-size: .85rem; padding-left: 2rem; }
